@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  /* Classification Colors */
+  --color-status-normal: #16A34A;
+  --color-status-elevated: #D97706;
+  --color-status-anormal: #DC2626;
+
+  /* Brand Colors */
+  --color-brand-primary: #1e293b; /* Slate 800 */
+  --color-brand-secondary: #334155; /* Slate 700 */
+  --color-brand-accent: #3b82f6; /* Blue 500 */
+
+  /* Typography */
+  --font-sans: "Outfit", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Layout Constants */
+  --spacing-sidebar: 280px;
+  --spacing-sidebar-collapsed: 80px;
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --border: #e2e8f0;
+  --ring: #3b82f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #020617;
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --card-foreground: #f8fafc;
+    --border: #1e293b;
+    --ring: #3b82f6;
+  }
+}
+
+* {
+  @apply border-[var(--border)];
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Glassmorphism utility */
+.glass {
+  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/20;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
