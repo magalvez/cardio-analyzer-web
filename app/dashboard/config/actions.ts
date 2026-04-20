@@ -9,7 +9,7 @@ export async function getClinicConfig() {
 
   const [config] = await sql`
     SELECT 
-      c.nombre, 
+      c.nombre as name, 
       c.guia_clinica as guide,
       c.guia_clinica_id as guide_id
     FROM clinicas c

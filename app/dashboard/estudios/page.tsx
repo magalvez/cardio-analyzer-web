@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Loader2
 } from "lucide-react";
-import { getStudies } from "./actions";
+import { getStudies, exportStudyWord } from "./actions";
 import Link from "next/link";
 
 const classificationColors: Record<string, string> = {
@@ -32,7 +32,7 @@ const statusStyles: Record<string, string> = {
   procesando: "bg-slate-100 text-slate-500 ",
   completado: "bg-blue-100 text-blue-600 ",
   revision: "bg-amber-100 text-amber-600 ",
-  aprobado: "bg-emerald-100 text-emerald-600 ",
+  firmado: "bg-emerald-100 text-emerald-600 ",
   cancelado: "bg-rose-100 text-rose-600 ",
 };
 
@@ -63,6 +63,18 @@ export default function EstudiosPage() {
     }, 500); // Debounce search
     return () => clearTimeout(timer);
   }, [fetchData]);
+
+  const handleDownloadQuick = async (id: string, patientName: string) => {
+    try {
+      const base64 = await exportStudyWord(id); // Use existing server report
+      const link = document.createElement('a');
+      link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${base64}`;
+      link.download = `Reporte_MAPA_${patientName.replace(/\s/g, '_')}.docx`;
+      link.click();
+    } catch (e) {
+      console.error("Error downloading:", e);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in">
@@ -99,12 +111,12 @@ export default function EstudiosPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 ">
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Paciente</th>
-                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Fecha</th>
-                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Motivo</th>
-                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Clasificación</th>
-                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Estado</th>
-                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Acciones</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-left min-w-[250px]">Paciente</th>
+                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-left w-[140px]">Fecha</th>
+                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-left">Motivo</th>
+                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-left w-[180px]">Clasificación</th>
+                <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-left w-[140px]">Estado</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-right w-[160px]">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100  relative">
@@ -152,7 +164,7 @@ export default function EstudiosPage() {
                       </td>
                       <td className="px-6 py-5">
                         <p className="text-sm font-medium text-slate-600 ">
-                          {new Date(study.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          {study.recibido_at ? new Date(study.recibido_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                         </p>
                       </td>
                       <td className="px-6 py-5">
@@ -178,10 +190,23 @@ export default function EstudiosPage() {
                           <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-slate-600 ">
                             <Eye className="w-4 h-4" />
                           </Link>
-                          <button className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-emerald-600">
+                          <button 
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-emerald-600 disabled:opacity-30"
+                            disabled={study.estado === 'firmado'}
+                            title="Firmar estudio"
+                          >
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-blue-600">
+                          <button 
+                            onClick={(e) => { 
+                              e.preventDefault(); 
+                              e.stopPropagation(); 
+                              handleDownloadQuick(study.id, study.patient); 
+                            }}
+                            className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-blue-600"
+                            title="Descargar Word"
+                          >
                             <Download className="w-4 h-4" />
                           </button>
                         </div>

@@ -2,6 +2,7 @@
 
 import sql from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import HTMLToDOCX from "html-to-docx";
 
 export async function getStudies(page = 1, pageSize = 10, search = "") {
   const session = await getSession();
@@ -59,4 +60,24 @@ export async function getStudies(page = 1, pageSize = 10, search = "") {
     studies,
     total: parseInt(totalResult.count)
   };
+}
+
+export async function exportStudyWord(id: string, html?: string) {
+  const session = await getSession();
+  if (!session) throw new Error("No session");
+
+  let finalHtml = html;
+  
+  if (!finalHtml) {
+    const [report] = await sql`SELECT informe_html FROM estudio_reportes WHERE estudio_id = ${id}`;
+    finalHtml = report?.informe_html || "<p>Informe no disponible</p>";
+  }
+
+  const docBuffer = await HTMLToDOCX(finalHtml, null, {
+    header: true,
+    footer: true,
+    pageNumber: true,
+  });
+
+  return docBuffer.toString('base64');
 }

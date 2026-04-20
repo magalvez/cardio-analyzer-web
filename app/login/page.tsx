@@ -27,7 +27,11 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push("/dashboard");
+        if (data.user.requiere_reset) {
+          router.push("/reset-password");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         setError(data.error || "Algo salió mal");
       }

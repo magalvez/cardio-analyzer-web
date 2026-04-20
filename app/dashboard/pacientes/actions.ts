@@ -11,8 +11,8 @@ export async function getPatients(search = "") {
     SELECT 
       p.*,
       count(e.id) as total_estudios,
-      max(e.created_at) as ultimo_estudio,
-      (SELECT r.clasificacion FROM estudios e2 JOIN resultados_ia r ON e2.id = r.estudio_id WHERE e2.paciente_id = p.id ORDER BY e2.created_at DESC LIMIT 1) as clasificacion_reciente
+      max(e.recibido_at) as ultimo_estudio,
+      (SELECT r.clasificacion FROM estudios e2 JOIN resultados_ia r ON e2.id = r.estudio_id WHERE e2.paciente_id = p.id ORDER BY e2.recibido_at DESC LIMIT 1) as clasificacion_reciente
     FROM pacientes p
     LEFT JOIN estudios e ON p.id = e.paciente_id
     WHERE p.clinica_id = ${session.clinica_id}

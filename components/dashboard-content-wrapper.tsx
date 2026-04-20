@@ -10,16 +10,21 @@ export default function DashboardContentWrapper({
   children: React.ReactNode;
   userEmail: string;
 }) {
-  const { collapsed } = useSidebar();
+  const { collapsed, isReady } = useSidebar();
+
+  // Handle hydration mismatch: default to server-rendered state (expanded)
+  // until we know the actual state from localStorage.
+  const paddingClass = !isReady 
+    ? "lg:pl-[280px]" 
+    : (collapsed ? "lg:pl-[80px]" : "lg:pl-[280px]");
 
   return (
     <div 
-      className="flex-1 flex flex-col transition-[padding] duration-300 ease-in-out"
-      style={{ 
-        paddingLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 
-          ? (collapsed ? '80px' : '280px') 
-          : '0px' 
-      }}
+      className={`
+        flex-1 flex flex-col transition-[padding] duration-300 ease-in-out
+        ${paddingClass}
+        pl-0
+      `}
     >
       <Topbar userEmail={userEmail} />
       

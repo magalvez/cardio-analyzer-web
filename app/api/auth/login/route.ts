@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // }
 
     const [user] = await sql`
-      SELECT id, email, password_hash, rol, clinica_id, medico_id, activo 
+      SELECT id, email, password_hash, rol, clinica_id, medico_id, activo, requiere_reset 
       FROM usuarios 
       WHERE email = ${email} 
       LIMIT 1
@@ -50,9 +50,17 @@ export async function POST(request: Request) {
       rol: user.rol,
       clinica_id: user.clinica_id,
       medico_id: user.medico_id,
+      requiere_reset: user.requiere_reset
     });
 
-    return NextResponse.json({ success: true, user: { email: user.email, rol: user.rol } });
+    return NextResponse.json({ 
+      success: true, 
+      user: { 
+        email: user.email, 
+        rol: user.rol, 
+        requiere_reset: user.requiere_reset 
+      } 
+    });
   } catch (error) {
     console.error("Login Error:", error);
     return NextResponse.json({ error: "Error en el servidor" }, { status: 500 });

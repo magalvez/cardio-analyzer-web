@@ -17,10 +17,12 @@ export default function ConfigPage() {
 
   useEffect(() => {
     getClinicConfig().then(data => {
-      setConfig(data);
-      setGuia(data.guide);
-      setName(data.name);
-      setIva(data.iva);
+      if (data) {
+        setConfig(data);
+        setGuia(data.guide || "ESH 2023");
+        setName(data.name || "");
+        setIva(data.iva || 0);
+      }
     }).finally(() => setLoading(false));
   }, []);
 
@@ -75,7 +77,12 @@ export default function ConfigPage() {
                   <label className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Dominio Seguro</label>
                   <div className="relative">
                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="text" value={`${config.name.toLowerCase().replace(/\s/g, '')}.mapacardio.com`} readOnly className="w-full bg-slate-50  border rounded-2xl py-3 pl-11 pr-4 font-medium text-slate-500" />
+                    <input 
+                      type="text" 
+                      value={`${(name || 'clinica').toLowerCase().replace(/\s/g, '')}.mapacardio.com`} 
+                      readOnly 
+                      className="w-full bg-slate-50  border rounded-2xl py-3 pl-11 pr-4 font-medium text-slate-500" 
+                    />
                   </div>
                 </div>
              </div>
