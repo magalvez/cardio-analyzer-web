@@ -25,8 +25,8 @@ export default function PacientesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Pacientes</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Directorio clínico y evolución histórica de pacientes.</p>
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Pacientes</h1>
+          <p className="text-slate-500  mt-1">Directorio clínico y evolución histórica de pacientes.</p>
         </div>
         
         <div className="relative group">
@@ -36,7 +36,7 @@ export default function PacientesPage() {
             placeholder="Nombre o cédula..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white dark:bg-slate-900 border rounded-xl py-2.5 pl-11 pr-4 text-sm w-[300px] outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
+            className="bg-white  border rounded-xl py-2.5 pl-11 pr-4 text-sm w-[300px] outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm"
           />
         </div>
       </div>
@@ -45,7 +45,7 @@ export default function PacientesPage() {
         <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800">
+              <tr className="border-b border-slate-100 ">
                 <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Paciente</th>
                 <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Edad / Sexo</th>
                 <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-center">Estudios</th>
@@ -67,29 +67,29 @@ export default function PacientesPage() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors cursor-pointer group"
+                  className="hover:bg-slate-50/50  transition-colors cursor-pointer group"
                 >
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                      <div className="w-10 h-10 rounded-xl bg-blue-50  text-blue-600 flex items-center justify-center font-bold">
                         {p.nombre_completo[0]}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{p.nombre_completo}</p>
+                        <p className="text-sm font-bold text-slate-900  leading-tight">{p.nombre_completo}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{p.cedula}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{p.edad} años • {p.sexo}</p>
+                    <p className="text-sm font-medium text-slate-600 ">{p.edad} años • {p.sexo}</p>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <span className="text-sm font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">
+                    <span className="text-sm font-black text-slate-900  bg-slate-100  px-3 py-1 rounded-lg">
                       {p.total_estudios}
                     </span>
                   </td>
                   <td className="px-6 py-5">
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <p className="text-sm font-medium text-slate-600 ">
                       {p.ultimo_estudio ? new Date(p.ultimo_estudio).toLocaleDateString() : "---"}
                     </p>
                   </td>
@@ -102,7 +102,7 @@ export default function PacientesPage() {
                     ) : <span className="text-xs text-slate-400">-</span>}
                   </td>
                   <td className="px-8 py-5 text-right">
-                    <button className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all opacity-0 group-hover:opacity-100">
+                    <button className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all opacity-0 group-hover:opacity-100">
                       <History className="w-4 h-4 text-slate-400" />
                     </button>
                   </td>

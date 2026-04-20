@@ -29,8 +29,8 @@ export default function TarifasPage() {
     <div className="space-y-6 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Tarifas por Médico</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Configura y gestiona el valor a pagar por cada estudio procesado.</p>
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Tarifas por Médico</h1>
+          <p className="text-slate-500  mt-1">Configura y gestiona el valor a pagar por cada estudio procesado.</p>
         </div>
         <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl px-6 py-3 text-sm font-bold active:scale-95 shadow-lg shadow-blue-500/20 transition-all">
           <Plus className="w-5 h-5" /> Nueva Tarifa
@@ -53,7 +53,7 @@ export default function TarifasPage() {
               placeholder="Filtrar médico..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-slate-50 dark:bg-slate-900 border-none rounded-xl py-2 pl-11 pr-4 text-sm font-medium outline-none"
+              className="bg-slate-50  border-none rounded-xl py-2 pl-11 pr-4 text-sm font-medium outline-none"
             />
           </div>
         </div>
@@ -64,7 +64,7 @@ export default function TarifasPage() {
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 dark:bg-slate-900/50">
+                <tr className="bg-slate-50/50 ">
                   <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Médico</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Tipo</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-slate-400">Valor</th>
@@ -72,7 +72,7 @@ export default function TarifasPage() {
                   <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 ">
                 {filteredTariffs.map((tariff, i) => (
                   <motion.tr key={tariff.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-8 py-5">

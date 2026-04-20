@@ -41,7 +41,7 @@ export default function LoginPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4">
       {/* Background with dynamic gradients */}
-      <div className="absolute inset-0 -z-10 bg-slate-50 dark:bg-slate-950">
+      <div className="absolute inset-0 -z-10 bg-slate-50">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full animate-pulse" />
       </div>
@@ -54,13 +54,13 @@ export default function LoginPage() {
       >
         {/* Logo and Greeting */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-xl mb-4 border border-slate-100 dark:border-slate-800">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-xl mb-4 border border-slate-100">
             <Heart className="w-8 h-8 text-status-anormal animate-pulse" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
             MAPA <span className="text-blue-500">Cardio</span>
           </h1>
-          <p className="mt-2 text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-slate-500">
             Bienvenido de nuevo, doctor.
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function LoginPage() {
         <div className="glass p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
+              <label className="text-sm font-medium text-slate-700  ml-1">
                 Correo electrónico
               </label>
               <div className="relative">
@@ -78,7 +78,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl py-3.5 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full bg-white  border border-slate-200  rounded-xl py-3.5 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   placeholder="doctor@clinica.com"
                   required
                 />
@@ -86,7 +86,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">
+              <label className="text-sm font-medium text-slate-700  ml-1">
                 Contraseña
               </label>
               <div className="relative">
@@ -95,7 +95,7 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl py-3.5 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full bg-white  border border-slate-200  rounded-xl py-3.5 pl-12 pr-4 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   placeholder="••••••••"
                   required
                 />
@@ -130,7 +130,7 @@ export default function LoginPage() {
         </div>
 
         {/* Footer info */}
-        <p className="mt-8 text-center text-sm text-slate-400 dark:text-slate-600">
+        <p className="mt-8 text-center text-sm text-slate-400 ">
           MAPA Cardio v2.0 &bull; Healthcare Analysis vIA
         </p>
       </motion.div>

@@ -77,7 +77,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
           <button 
             onClick={handleDownload}
             disabled={downloading}
-            className="flex items-center gap-2 bg-white dark:bg-slate-900 border rounded-xl px-4 py-2 text-sm font-bold shadow-sm hover:bg-slate-50 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 bg-white  border rounded-xl px-4 py-2 text-sm font-bold shadow-sm hover:bg-slate-50 transition-all disabled:opacity-50"
           >
             {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             Word
@@ -106,11 +106,11 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <div className="bg-slate-50  p-3 rounded-2xl border border-slate-100 ">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Edad</p>
                 <p className="font-bold">{study.patient_age} años</p>
               </div>
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <div className="bg-slate-50  p-3 rounded-2xl border border-slate-100 ">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Sexo</p>
                 <p className="font-bold">{study.patient_sex}</p>
               </div>
@@ -130,7 +130,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
         </div>
 
         <div className="xl:col-span-3 space-y-6">
-          <div className="flex bg-white dark:bg-slate-900 p-1 rounded-2xl border max-w-fit shadow-sm">
+          <div className="flex bg-white  p-1 rounded-2xl border max-w-fit shadow-sm">
             <TabButton active={activeTab === "analisis"} onClick={() => setActiveTab("analisis")} icon={LineChart} label="Análisis" />
             <TabButton active={activeTab === "imagenes"} onClick={() => setActiveTab("imagenes")} icon={ImageIcon} label="Imágenes" />
             <TabButton active={activeTab === "informe"} onClick={() => setActiveTab("informe")} icon={FileText} label="Editor" />
@@ -147,7 +147,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
                 <div className="glass p-8 rounded-[2.5rem] relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-10"><Heart className="w-24 h-24 text-blue-500" /></div>
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">Narrativa IA <span className="text-[10px] bg-blue-500/10 px-2 py-0.5 rounded-full">Gemini</span></h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg italic">"{study.results?.narrativa_analisis || "No hay narrativa disponible."}"</p>
+                  <p className="text-slate-600  leading-relaxed text-lg italic">"{study.results?.narrativa_analisis || "No hay narrativa disponible."}"</p>
                 </div>
               </motion.div>
             )}
@@ -159,7 +159,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
                    <button 
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 text-blue-600 font-bold text-sm bg-blue-50 dark:bg-blue-500/10 px-4 py-2 rounded-xl transition-all hover:scale-105 disabled:opacity-50"
+                    className="flex items-center gap-2 text-blue-600 font-bold text-sm bg-blue-50  px-4 py-2 rounded-xl transition-all hover:scale-105 disabled:opacity-50"
                    >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     {saving ? "Guardando..." : "Guardar Cambios"}
@@ -199,7 +199,7 @@ function MetricRow({ label, val, sub }: any) {
 
 function TabButton({ active, onClick, icon: Icon, label }: any) {
   return (
-    <button onClick={onClick} className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-bold text-sm ${active ? "bg-slate-900 text-white dark:bg-blue-600 shadow-md" : "text-slate-500 hover:bg-slate-50"}`}>
+    <button onClick={onClick} className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-bold text-sm ${active ? "bg-slate-900 text-white  shadow-md" : "text-slate-500 hover:bg-slate-50"}`}>
       <Icon className="w-4 h-4" /> {label}
     </button>
   );

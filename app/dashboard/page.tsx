@@ -57,8 +57,8 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Panel de Control</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Sincronizado con datos reales de la clínica.</p>
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Panel de Control</h1>
+          <p className="text-slate-500  mt-1">Sincronizado con datos reales de la clínica.</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm tracking-wide">
@@ -86,8 +86,8 @@ export default function DashboardPage() {
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stat.name}</p>
-              <h3 className="text-3xl font-bold text-slate-900 dark:text-white mt-1 leading-none tracking-tight">
+              <p className="text-xs font-bold text-slate-400  uppercase tracking-widest">{stat.name}</p>
+              <h3 className="text-3xl font-bold text-slate-900  mt-1 leading-none tracking-tight">
                 {stat.value}
               </h3>
             </div>
@@ -108,12 +108,46 @@ export default function DashboardPage() {
                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                    </linearGradient>
+                   <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f033" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', fontSize: '12px', color: '#fff' }} />
-                <Area type="monotone" dataKey="total" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#ffffff', 
+                    border: '1px solid #e2e8f0', 
+                    borderRadius: '16px', 
+                    fontSize: '12px', 
+                    color: '#0f172a',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
+                  }} 
+                />
+                
+                {/* Real Data Line (Solid) */}
+                <Area 
+                  type="monotone" 
+                  dataKey="total" 
+                  stroke="#3b82f6" 
+                  strokeWidth={3} 
+                  fillOpacity={1} 
+                  fill="url(#colorTotal)" 
+                />
+
+                {/* Forecast Line (Dotted) - Overlaid on top with subtle fill */}
+                <Area 
+                  type="monotone" 
+                  dataKey="forecast" 
+                  stroke="#3b82f6" 
+                  strokeWidth={2} 
+                  strokeDasharray="5 5"
+                  fillOpacity={1} 
+                  fill="url(#colorForecast)"
+                  connectNulls={true}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -141,10 +175,10 @@ function ClassificationItem({ label, value }: { label: string; value: number }) 
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-end">
-        <span className="text-sm font-bold text-slate-700 dark:text-slate-300 tracking-tight capitalize">{labelMap[label] || label}</span>
-        <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{value}%</span>
+        <span className="text-sm font-bold text-slate-700  tracking-tight capitalize">{labelMap[label] || label}</span>
+        <span className="text-lg font-black text-slate-900  leading-none">{value}%</span>
       </div>
-      <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-2.5 w-full bg-slate-100  rounded-full overflow-hidden">
         <motion.div initial={{ width: 0 }} animate={{ width: `${value}%` }} transition={{ duration: 1.5 }} className={`h-full ${color}`} />
       </div>
     </div>

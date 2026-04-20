@@ -28,8 +28,8 @@ export default function LiquidacionesPage() {
     <div className="space-y-6 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Liquidaciones</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Gestión financiera de honorarios médicos por estudios realizados.</p>
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Liquidaciones</h1>
+          <p className="text-slate-500  mt-1">Gestión financiera de honorarios médicos por estudios realizados.</p>
         </div>
         <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl px-6 py-3 text-sm font-bold active:scale-95 shadow-lg shadow-blue-500/20 transition-all">
           <Plus className="w-5 h-5" /> Nueva Liquidación
@@ -62,7 +62,7 @@ export default function LiquidacionesPage() {
                   <th className="px-8 py-4 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 ">
                 {data.map((liq, i) => (
                   <motion.tr key={liq.id} className="hover:bg-slate-50/20 transition-colors group">
                     <td className="px-8 py-5">

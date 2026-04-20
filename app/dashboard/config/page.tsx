@@ -41,8 +41,8 @@ export default function ConfigPage() {
     <div className="space-y-6 animate-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Configuración</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Sincronizado con los parámetros institucionales de tu clínica.</p>
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Configuración</h1>
+          <p className="text-slate-500  mt-1">Sincronizado con los parámetros institucionales de tu clínica.</p>
         </div>
         <button 
           onClick={handleSave}
@@ -68,14 +68,14 @@ export default function ConfigPage() {
                     type="text" 
                     value={name} 
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-white dark:bg-slate-950 border rounded-2xl py-3 px-4 outline-none font-medium" 
+                    className="w-full bg-white  border rounded-2xl py-3 px-4 outline-none font-medium" 
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Dominio Seguro</label>
                   <div className="relative">
                     <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input type="text" value={`${config.name.toLowerCase().replace(/\s/g, '')}.mapacardio.com`} readOnly className="w-full bg-slate-50 dark:bg-slate-900/50 border rounded-2xl py-3 pl-11 pr-4 font-medium text-slate-500" />
+                    <input type="text" value={`${config.name.toLowerCase().replace(/\s/g, '')}.mapacardio.com`} readOnly className="w-full bg-slate-50  border rounded-2xl py-3 pl-11 pr-4 font-medium text-slate-500" />
                   </div>
                 </div>
              </div>
@@ -110,7 +110,7 @@ export default function ConfigPage() {
                     type="number" 
                     value={iva} 
                     onChange={(e) => setIva(Number(e.target.value))}
-                    className="w-full bg-white dark:bg-slate-950 border rounded-2xl py-4 px-6 text-2xl font-black outline-none" 
+                    className="w-full bg-white  border rounded-2xl py-4 px-6 text-2xl font-black outline-none" 
                   />
                   <div className="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-slate-400">%</div>
                 </div>
@@ -132,7 +132,7 @@ export default function ConfigPage() {
 
 function GuiaOption({ id, title, desc, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={`p-6 rounded-[2rem] border-2 text-left transition-all ${active ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'}`}>
+    <button onClick={onClick} className={`p-6 rounded-[2rem] border-2 text-left transition-all ${active ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white  border-slate-100 '}`}>
       <BookOpen className={`w-6 h-6 mb-4 ${active ? 'text-white' : 'text-blue-500'}`} />
       <h3 className="font-bold text-lg leading-tight mb-1">{title}</h3>
       <p className={`text-[10px] font-bold uppercase tracking-tighter ${active ? 'text-blue-100' : 'text-slate-400'}`}>{desc}</p>
@@ -143,8 +143,8 @@ function GuiaOption({ id, title, desc, active, onClick }: any) {
 function ToggleItem({ label, active }: any) {
   return (
     <div className="flex items-center justify-between group">
-      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{label}</span>
-      <div className={`w-10 h-6 rounded-full p-1 transition-colors ${active ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-800'}`}>
+      <span className="text-sm font-medium text-slate-600 ">{label}</span>
+      <div className={`w-10 h-6 rounded-full p-1 transition-colors ${active ? 'bg-blue-600' : 'bg-slate-200 '}`}>
         <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${active ? 'translate-x-4' : 'translate-x-0'}`} />
       </div>
     </div>

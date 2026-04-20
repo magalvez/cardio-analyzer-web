@@ -7,9 +7,12 @@
   --color-status-anormal: #DC2626;
 
   /* Brand Colors */
-  --color-brand-primary: #1e293b; /* Slate 800 */
-  --color-brand-secondary: #334155; /* Slate 700 */
-  --color-brand-accent: #3b82f6; /* Blue 500 */
+  --color-brand-primary: #1e293b;
+  /* Slate 800 */
+  --color-brand-secondary: #334155;
+  /* Slate 700 */
+  --color-brand-accent: #3b82f6;
+  /* Blue 500 */
 
   /* Typography */
   --font-sans: "Outfit", var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
@@ -29,36 +32,36 @@
   --ring: #3b82f6;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    --card-foreground: #f8fafc;
-    --border: #1e293b;
-    --ring: #3b82f6;
-  }
-}
-
 * {
   @apply border-[var(--border)];
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+/* Glassmorphism utility - FORCING LIGHT COLORS */
+.glass {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #0f172a !important;
 }
 
-/* Glassmorphism utility */
-.glass {
-  @apply bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border border-white/20 dark:border-slate-800/20;
+body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-in {

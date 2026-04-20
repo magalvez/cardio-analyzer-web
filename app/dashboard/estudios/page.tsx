@@ -29,11 +29,11 @@ const classificationLabels: Record<string, string> = {
 };
 
 const statusStyles: Record<string, string> = {
-  procesando: "bg-slate-100 text-slate-500 dark:bg-slate-800",
-  completado: "bg-blue-100 text-blue-600 dark:bg-blue-500/10",
-  revision: "bg-amber-100 text-amber-600 dark:bg-amber-500/10",
-  aprobado: "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10",
-  cancelado: "bg-rose-100 text-rose-600 dark:bg-rose-500/10",
+  procesando: "bg-slate-100 text-slate-500 ",
+  completado: "bg-blue-100 text-blue-600 ",
+  revision: "bg-amber-100 text-amber-600 ",
+  aprobado: "bg-emerald-100 text-emerald-600 ",
+  cancelado: "bg-rose-100 text-rose-600 ",
 };
 
 export default function EstudiosPage() {
@@ -69,8 +69,8 @@ export default function EstudiosPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Estudios</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <h1 className="text-3xl font-bold text-slate-900  tracking-tight">Estudios</h1>
+          <p className="text-slate-500  mt-1">
             Gestiona y revisa los reportes MAPA procesados de la clínica.
           </p>
         </div>
@@ -83,10 +83,10 @@ export default function EstudiosPage() {
               placeholder="Buscar paciente o cédula..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white dark:bg-slate-900 border rounded-xl py-2.5 pl-11 pr-4 text-sm w-[250px] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+              className="bg-white  border rounded-xl py-2.5 pl-11 pr-4 text-sm w-[250px] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             />
           </div>
-          <button className="flex items-center gap-2 bg-white dark:bg-slate-900 border rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+          <button className="flex items-center gap-2 bg-white  border rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700  hover:bg-slate-50  transition-all shadow-sm">
             <Filter className="w-4 h-4" />
             Filtros
           </button>
@@ -94,11 +94,11 @@ export default function EstudiosPage() {
       </div>
 
       {/* Table Container */}
-      <div className="glass rounded-[2rem] shadow-xl border-slate-100 dark:border-slate-800/50 relative overflow-hidden">
+      <div className="glass rounded-[2rem] shadow-xl border-slate-100  relative overflow-hidden">
         <div className="overflow-x-auto min-h-[400px]">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800">
+              <tr className="border-b border-slate-100 ">
                 <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Paciente</th>
                 <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Fecha</th>
                 <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-slate-400">Motivo</th>
@@ -107,7 +107,7 @@ export default function EstudiosPage() {
                 <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-slate-400 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 relative">
+            <tbody className="divide-y divide-slate-100  relative">
               <AnimatePresence mode="popLayout">
                 {loading ? (
                   <tr key="loading">
@@ -122,7 +122,7 @@ export default function EstudiosPage() {
                   <tr key="empty">
                     <td colSpan={6} className="px-8 py-20 text-center">
                       <div className="flex flex-col items-center gap-3">
-                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                        <div className="w-16 h-16 bg-slate-100  rounded-2xl flex items-center justify-center">
                           <Search className="w-8 h-8 text-slate-300" />
                         </div>
                         <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No se encontraron estudios</p>
@@ -137,26 +137,26 @@ export default function EstudiosPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.98 }}
                       transition={{ duration: 0.2 }}
-                      className="hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-colors cursor-pointer group"
+                      className="hover:bg-blue-50/30  transition-colors cursor-pointer group"
                     >
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-bold text-slate-500 group-hover:scale-110 transition-transform duration-500">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100  flex items-center justify-center font-bold text-slate-500 group-hover:scale-110 transition-transform duration-500">
                             {study.patient?.[0] || "?"}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{study.patient}</p>
+                            <p className="text-sm font-bold text-slate-900  leading-tight">{study.patient}</p>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{study.id_number}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        <p className="text-sm font-medium text-slate-600 ">
                           {new Date(study.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </p>
                       </td>
                       <td className="px-6 py-5">
-                        <span className="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 px-3 py-1 rounded-lg">
+                        <span className="text-xs font-bold bg-slate-100  text-slate-500 px-3 py-1 rounded-lg">
                           {study.motivo_consulta}
                         </span>
                       </td>
@@ -175,13 +175,13 @@ export default function EstudiosPage() {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-slate-600 dark:text-slate-400">
+                          <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-slate-600 ">
                             <Eye className="w-4 h-4" />
                           </Link>
-                          <button className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-emerald-600">
+                          <button className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-emerald-600">
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg shadow-sm border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-blue-600">
+                          <button className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-blue-600">
                             <Download className="w-4 h-4" />
                           </button>
                         </div>
@@ -195,15 +195,15 @@ export default function EstudiosPage() {
         </div>
 
         {/* Footer / Pagination */}
-        <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-6 border-t border-slate-100  flex items-center justify-between">
           <p className="text-sm text-slate-500 font-medium">
-            Mostrando <span className="text-slate-900 dark:text-white font-bold">{Math.min((page - 1) * pageSize + 1, total)} - {Math.min(page * pageSize, total)}</span> de <span className="text-slate-900 dark:text-white font-bold">{total}</span> estudios
+            Mostrando <span className="text-slate-900  font-bold">{Math.min((page - 1) * pageSize + 1, total)} - {Math.min(page * pageSize, total)}</span> de <span className="text-slate-900  font-bold">{total}</span> estudios
           </p>
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1 || loading}
-              className="p-2 border rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-30 cursor-pointer"
+              className="p-2 border rounded-xl hover:bg-slate-50  transition-colors disabled:opacity-30 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -213,7 +213,7 @@ export default function EstudiosPage() {
             <button 
               onClick={() => setPage(p => p + 1)}
               disabled={page * pageSize >= total || loading}
-              className="p-2 border rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-30 cursor-pointer"
+              className="p-2 border rounded-xl hover:bg-slate-50  transition-colors disabled:opacity-30 cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

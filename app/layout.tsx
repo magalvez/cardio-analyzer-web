@@ -15,6 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MAPA Cardio — Web App",
   description: "Plataforma de gestión y análisis de estudios MAPA cardiológicos.",
+  other: {
+    "color-scheme": "light"
+  }
 };
 
 export default function RootLayout({
@@ -23,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="h-full antialiased">
+    <html lang="es" className="h-full antialiased" style={{ colorScheme: 'light' }}>
       <body
         className={`${outfit.variable} ${jetbrainsMono.variable} font-sans min-h-full flex flex-col`}
       >

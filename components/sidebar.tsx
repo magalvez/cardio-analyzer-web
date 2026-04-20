@@ -16,6 +16,7 @@ import {
   Heart
 } from "lucide-react";
 import { handleLogout } from "@/app/dashboard/logout-action";
+import { useSidebar } from "./sidebar-context";
 
 const menuItems = [
   { name: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
@@ -31,13 +32,14 @@ const adminItems = [
 ];
 
 export default function Sidebar({ userRole }: { userRole: string }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggle } = useSidebar();
   const pathname = usePathname();
 
   return (
     <motion.aside
       animate={{ width: collapsed ? 80 : 280 }}
-      className="hidden lg:flex flex-col h-screen fixed left-0 top-0 glass border-r z-50 transition-all duration-300"
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="hidden lg:flex flex-col h-screen fixed left-0 top-0 glass border-r z-50"
     >
       {/* Header */}
       <div className="p-6 flex items-center justify-between overflow-hidden whitespace-nowrap">
@@ -62,8 +64,8 @@ export default function Sidebar({ userRole }: { userRole: string }) {
 
       {/* Toggle Button */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 bg-white dark:bg-slate-900 border rounded-full p-1 shadow-md hover:scale-110 transition-transform"
+        onClick={toggle}
+        className="absolute -right-3 top-20 bg-white border rounded-full p-1 shadow-md hover:scale-110 transition-transform"
       >
         {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
       </button>
@@ -83,7 +85,7 @@ export default function Sidebar({ userRole }: { userRole: string }) {
           <>
             <div className="pt-6 pb-2 px-2">
               {!collapsed && <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Administración</p>}
-              {collapsed && <div className="h-px bg-slate-200 dark:bg-slate-800 w-full" />}
+              {collapsed && <div className="h-px bg-slate-200  w-full" />}
             </div>
             {adminItems.map((item) => (
               <MenuItem 
@@ -98,7 +100,7 @@ export default function Sidebar({ userRole }: { userRole: string }) {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+      <div className="p-4 border-t border-slate-200 ">
         <button 
           onClick={() => handleLogout()}
           className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-500 hover:text-status-anormal hover:bg-status-anormal/5 transition-colors group"
@@ -121,7 +123,7 @@ function MenuItem({ item, active, collapsed }: { item: any; active: boolean; col
         flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all relative group
         ${active 
           ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
-          : "text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-white"}
+          : "text-slate-500 hover:bg-slate-100  hover:text-slate-900 "}
       `}
     >
       <Icon className={`w-5 h-5 shrink-0 ${active ? "animate-pulse" : ""}`} />
