@@ -9,7 +9,8 @@ import {
   ArrowUpRight, 
   ArrowDownRight,
   Activity,
-  Loader2
+  Loader2,
+  Info
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -26,16 +27,18 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [exporting, setExporting] = useState(false);
+  const [daysRange, setDaysRange] = useState(15);
 
   useEffect(() => {
-    getDashboardStats().then(setStats).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    getDashboardStats(daysRange).then(setStats).finally(() => setLoading(false));
+  }, [daysRange]);
 
-  if (loading) {
+  if (loading && !stats) {
      return (
        <div className="h-[80vh] flex flex-col items-center justify-center p-8 gap-4">
           <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-          <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Sincronizando con la red MAPA...</p>
+          <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Sincronizando con la red CARDIO Analyzer...</p>
        </div>
      );
   }
@@ -48,10 +51,46 @@ export default function DashboardPage() {
   };
 
   const kpiData = [
-    { name: "Total Estudios", value: safeStats.kpis.total, change: "+12%", trend: "up", icon: Activity, color: "text-blue-600", bg: "bg-blue-500/10" },
-    { name: "Pendientes", value: safeStats.kpis.pendientes, change: "-2", trend: "down", icon: Clock, color: "text-amber-600", bg: "bg-amber-500/10" },
-    { name: "Aprobados", value: safeStats.kpis.aprobados, change: "+8%", trend: "up", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-500/10" },
-    { name: "Siguiente Forecast", value: Math.round(safeStats.kpis.total * 1.15), change: "+15%", trend: "up", icon: Users, color: "text-rose-600", bg: "bg-rose-500/10" },
+    { 
+      name: "Total Estudios", 
+      value: safeStats.kpis.total, 
+      change: safeStats.kpis.change || "+0%", 
+      trend: parseFloat(safeStats.kpis.change) >= 0 ? "up" : "down", 
+      icon: Activity, 
+      color: "text-blue-600", 
+      bg: "bg-blue-500/10",
+      info: "Comparativa porcentual del volumen total de estudios entre los últimos 14 días y el periodo anterior de 14 días."
+    },
+    { 
+      name: "Pendientes", 
+      value: safeStats.kpis.pendientes, 
+      change: "-2", 
+      trend: "down", 
+      icon: Clock, 
+      color: "text-amber-600", 
+      bg: "bg-amber-500/10",
+      info: "Cantidad de estudios en proceso (Recibido, Procesando, Revisión) que requieren atención del equipo médico."
+    },
+    { 
+      name: "Siguiente Forecast", 
+      value: Math.round(safeStats.kpis.total * 1.15), 
+      change: "+15%", 
+      trend: "up", 
+      icon: Users, 
+      color: "text-rose-600", 
+      bg: "bg-rose-500/10",
+      info: "Proyección estadística estimada (+15%) del volumen de estudios para el cierre del ciclo actual basada en la tendencia."
+    },
+    { 
+      name: "Aprobados", 
+      value: safeStats.kpis.aprobados, 
+      change: "+8%", 
+      trend: "up", 
+      icon: CheckCircle2, 
+      color: "text-emerald-600", 
+      bg: "bg-emerald-500/10",
+      info: "Porcentaje de estudios que ya cuentan con firma electrónica y diagnóstico validado."
+    },
   ];
 
   return (
@@ -95,15 +134,29 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all group cursor-default"
+            className="glass p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all group cursor-default relative overflow-visible"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`${stat.bg} p-3 rounded-2xl`}>
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
-              <div className={`flex items-center gap-1 text-sm font-bold ${stat.trend === "up" ? "text-emerald-500" : "text-amber-500"}`}>
-                {stat.change}
-                {stat.trend === "up" ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+              
+              <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-1 text-sm font-bold ${stat.trend === "up" ? "text-emerald-500" : "text-amber-500"}`}>
+                  {stat.change}
+                  {stat.trend === "up" ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                </div>
+                
+                {/* Tooltip Wrapper */}
+                <div className="relative group/tooltip">
+                  <Info className="w-4 h-4 text-slate-300 hover:text-blue-500 cursor-help transition-colors" />
+                  <div className="absolute bottom-full right-0 mb-2 w-48 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50">
+                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-xl shadow-xl font-medium leading-relaxed relative">
+                      {stat.info}
+                      <div className="absolute top-full right-2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div>
@@ -117,9 +170,30 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass p-8 rounded-[2.5rem] flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-bold tracking-tight">Volumen de Estudios (30d)</h3>
+        <div className="lg:col-span-2 glass p-8 rounded-[2.5rem] flex flex-col relative overflow-hidden">
+          {loading && (
+            <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <h3 className="text-xl font-bold tracking-tight">Volumen de Estudios</h3>
+            
+            <div className="flex bg-slate-100/50  p-1 rounded-xl items-center">
+               {[15, 30, 45, 60].map((d) => (
+                 <button
+                   key={d}
+                   onClick={() => setDaysRange(d)}
+                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                     daysRange === d 
+                       ? "bg-white text-blue-600 shadow-sm" 
+                       : "text-slate-500 hover:text-slate-900"
+                   }`}
+                 >
+                   {d} días
+                 </button>
+               ))}
+            </div>
           </div>
           <div className="h-[300px] w-full mt-auto">
             <ResponsiveContainer width="100%" height="100%">

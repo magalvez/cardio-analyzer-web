@@ -27,43 +27,40 @@ export async function getStudies(page = 1, pageSize = 10, search = "", filters: 
     ? sql`AND e.clinica_id = ${session.clinica_id}`
     : sql`AND e.medico_solicitante_id = ${session.medico_id}`;
 
-  const studies = await sql`
-    SELECT 
-      e.id, 
-      e.estado, 
-      e.motivo as motivo_consulta,
-      e.notas_medico, 
-      e.aprobado_at,
-      e.recibido_at,
-      p.nombre_completo as patient, 
-      p.cedula as id_number, 
-      r.clasificacion, 
-      r.promedio_pas_general, 
-      r.promedio_pad_general,
-      r.id as resultado_id
-    FROM estudios e
-    JOIN pacientes p ON e.paciente_id = p.id
-    LEFT JOIN resultados_ia r ON e.id = r.estudio_id
-    WHERE 1=1
-    ${roleFilter}
-    ${searchFilter}
-    ${statusFilter}
-    ${classFilter}
-    ORDER BY e.recibido_at DESC
-    LIMIT ${pageSize} OFFSET ${offset}
-  `;
-
-  const [totalResult] = await sql`
-    SELECT count(*) 
-    FROM estudios e
-    JOIN pacientes p ON e.paciente_id = p.id
-    LEFT JOIN resultados_ia r ON e.id = r.estudio_id
-    WHERE 1=1
-    ${roleFilter}
-    ${searchFilter}
-    ${statusFilter}
-    ${classFilter}
-  `;
+  // Parallel execution of data fetch and count
+  const [studies, totalResult] = await Promise.all([
+    sql`
+      SELECT 
+        e.id, 
+        e.estado, 
+        e.motivo as motivo_consulta,
+        e.recibido_at,
+        p.nombre_completo as patient, 
+        p.cedula as id_number, 
+        r.clasificacion
+      FROM estudios e
+      JOIN pacientes p ON e.paciente_id = p.id
+      LEFT JOIN resultados_ia r ON e.id = r.estudio_id
+      WHERE 1=1
+      ${roleFilter}
+      ${searchFilter}
+      ${statusFilter}
+      ${classFilter}
+      ORDER BY e.recibido_at DESC
+      LIMIT ${pageSize} OFFSET ${offset}
+    `,
+    sql`
+      SELECT count(*) 
+      FROM estudios e
+      JOIN pacientes p ON e.paciente_id = p.id
+      ${classFilter ? sql`LEFT JOIN resultados_ia r ON e.id = r.estudio_id` : sql``}
+      WHERE 1=1
+      ${roleFilter}
+      ${searchFilter}
+      ${statusFilter}
+      ${classFilter}
+    `
+  ]);
 
   return {
     studies,

@@ -18,9 +18,14 @@ export async function getDoctors() {
       m.especialidad as specialty,
       m.telegram_user_id::text as telegram_user_id,
       m.telegram_username,
-      (SELECT count(*)::int FROM estudios e WHERE e.medico_solicitante_id = m.id) as studies_count
+      COALESCE(e_stats.total, 0)::int as studies_count
     FROM usuarios u
     LEFT JOIN medicos m ON u.medico_id = m.id
+    LEFT JOIN (
+      SELECT medico_solicitante_id, count(*) as total
+      FROM estudios
+      GROUP BY medico_solicitante_id
+    ) e_stats ON e_stats.medico_solicitante_id = m.id
     WHERE u.clinica_id = ${session.clinica_id}
     ORDER BY u.rol DESC, m.nombre_completo ASC
   `;
