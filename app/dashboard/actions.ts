@@ -89,9 +89,12 @@ export async function getDashboardStats(days: number = 14) {
 
     const distribution = distributionResult || [];
 
+    // Normalize 'now' to the clinic's timezone (Bogotá -05:00)
+    // This ensures local and Vercel show the same "today"
+    const now = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Bogota"}));
+    
     // Fill missing days
     const chartData: any[] = [];
-    const now = new Date();
     for (let i = days; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
@@ -99,6 +102,7 @@ export async function getDashboardStats(days: number = 14) {
       
       const match = volumeResult.find((r: any) => {
          const rDate = new Date(r.day);
+         // Compare in UTC to avoid double-offsetting
          return rDate.getUTCDate() === d.getDate() && 
                 rDate.getUTCMonth() === d.getMonth() && 
                 rDate.getUTCFullYear() === d.getFullYear();
