@@ -17,9 +17,10 @@ try {
     username: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
     ssl: 'require',
-    max: 10,
-    idle_timeout: 20,
+    max: 3,
+    idle_timeout: 10,
     connect_timeout: 10,
+    prepare: false, // Recommended for Supabase/PgBouncer
   };
 } catch (e) {
   console.error("Invalid DATABASE_URL, falling back to raw string");
