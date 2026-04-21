@@ -4,13 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  Settings, 
-  CreditCard, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  FileText,
+  Users,
+  Settings,
+  CreditCard,
+  ChevronLeft,
   ChevronRight,
   LogOut,
   Heart
@@ -53,12 +53,12 @@ export default function Sidebar({ userRole }: { userRole: string }) {
             >
               <Heart className="w-8 h-8 text-status-anormal" />
               <span className="text-xl font-bold tracking-tight">
-                MAPA <span className="text-blue-500">Cardio</span>
+                CARDIO <span className="text-blue-500">Analyzer</span>
               </span>
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {collapsed && <Heart className="w-8 h-8 text-status-anormal mx-auto" />}
       </div>
 
@@ -73,11 +73,11 @@ export default function Sidebar({ userRole }: { userRole: string }) {
       {/* Menu */}
       <nav className="flex-1 px-4 mt-8 space-y-2 overflow-y-auto no-scrollbar">
         {menuItems.map((item) => (
-          <MenuItem 
-            key={item.href} 
-            item={item} 
-            active={pathname === item.href} 
-            collapsed={collapsed} 
+          <MenuItem
+            key={item.href}
+            item={item}
+            active={pathname === item.href}
+            collapsed={collapsed}
           />
         ))}
 
@@ -88,11 +88,11 @@ export default function Sidebar({ userRole }: { userRole: string }) {
               {collapsed && <div className="h-px bg-slate-200  w-full" />}
             </div>
             {adminItems.map((item) => (
-              <MenuItem 
-                key={item.href} 
-                item={item} 
-                active={pathname === item.href} 
-                collapsed={collapsed} 
+              <MenuItem
+                key={item.href}
+                item={item}
+                active={pathname === item.href}
+                collapsed={collapsed}
               />
             ))}
           </>
@@ -101,7 +101,7 @@ export default function Sidebar({ userRole }: { userRole: string }) {
 
       {/* Footer */}
       <div className="p-4 border-t border-slate-200 ">
-        <button 
+        <button
           onClick={() => handleLogout()}
           className="flex items-center gap-4 w-full px-4 py-3 rounded-xl text-slate-500 hover:text-status-anormal hover:bg-status-anormal/5 transition-colors group"
         >
@@ -115,14 +115,14 @@ export default function Sidebar({ userRole }: { userRole: string }) {
 
 function MenuItem({ item, active, collapsed }: { item: any; active: boolean; collapsed: boolean }) {
   const Icon = item.icon;
-  
+
   return (
     <Link
       href={item.href}
       className={`
         flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all relative group
-        ${active 
-          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20" 
+        ${active
+          ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
           : "text-slate-500 hover:bg-slate-100  hover:text-slate-900 "}
       `}
     >
@@ -130,7 +130,7 @@ function MenuItem({ item, active, collapsed }: { item: any; active: boolean; col
       {!collapsed && (
         <span className="font-medium whitespace-nowrap">{item.name}</span>
       )}
-      
+
       {collapsed && (
         <div className="absolute left-full ml-4 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-[100]">
           {item.name}

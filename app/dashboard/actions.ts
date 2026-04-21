@@ -9,7 +9,7 @@ export async function getDashboardStats() {
     const session = await getSession();
     if (!session) throw new Error("No session");
 
-    const roleFilter = session.rol === 'admin' 
+    const roleFilter = session.rol === 'admin'
       ? sql`AND clinica_id = ${session.clinica_id}`
       : sql`AND medico_solicitante_id = ${session.medico_id}`;
 
@@ -38,9 +38,9 @@ export async function getDashboardStats() {
       FROM categories c
       LEFT JOIN resultados_ia r ON c.clasificacion = r.clasificacion
       LEFT JOIN estudios e ON e.id = r.estudio_id AND (
-        ${session.rol === 'admin' 
-          ? sql`e.clinica_id = ${session.clinica_id}`
-          : sql`e.medico_solicitante_id = ${session.medico_id}`}
+        ${session.rol === 'admin'
+        ? sql`e.clinica_id = ${session.clinica_id}`
+        : sql`e.medico_solicitante_id = ${session.medico_id}`}
       )
       GROUP BY c.clasificacion, c.label
       ORDER BY 
@@ -70,7 +70,7 @@ export async function getDashboardStats() {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dateStr = d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-      const match = rawVolumeData.find((r: any) => 
+      const match = rawVolumeData.find((r: any) =>
         new Date(r.day).toDateString() === d.toDateString()
       );
       chartData.push({
@@ -181,7 +181,7 @@ export async function exportAnnualReport() {
         </table>
 
         <div style="margin-top: 100px; text-align: center; border-top: 1pt solid #e2e8f0; padding-top: 20px;">
-          <p style="font-size: 9pt; color: #94a3b8;">Este documento es un reporte estadístico generado por el sistema MAPA Cardio Analyzer.</p>
+          <p style="font-size: 9pt; color: #94a3b8;">Este documento es un reporte estadístico generado por el sistema CARDIO Analyzer.</p>
           <p style="font-size: 9pt; color: #94a3b8;">&copy; ${year} Cardio Analyzer Labs. Todos los derechos reservados.</p>
         </div>
       </div>

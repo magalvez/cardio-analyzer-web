@@ -13,8 +13,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MAPA Cardio — Web App",
-  description: "Plataforma de gestión y análisis de estudios MAPA cardiológicos.",
+  title: "CARDIO Analyzer — Web App",
+  description: "Plataforma de gestión y análisis de estudios cardiológicos.",
   other: {
     "color-scheme": "light"
   }

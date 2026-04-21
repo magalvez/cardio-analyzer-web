@@ -62,7 +62,7 @@ export default function LoginPage() {
             <Heart className="w-8 h-8 text-status-anormal animate-pulse" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            MAPA <span className="text-blue-500">Cardio</span>
+            CARDIO <span className="text-blue-500">Analyzer</span>
           </h1>
           <p className="mt-2 text-slate-500">
             Bienvenido de nuevo, doctor.
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
         {/* Footer info */}
         <p className="mt-8 text-center text-sm text-slate-400 ">
-          MAPA Cardio v2.0 &bull; Healthcare Analysis vIA
+          Cardio Analyzer v2.0 &bull; Healthcare Analysis vIA
         </p>
       </motion.div>
     </div>

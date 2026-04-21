@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
+import {
   Plus, FileText, Calendar, ArrowUpRight, CheckCircle2, Clock, Printer, Loader2
 } from "lucide-react";
 import { getLiquidations } from "./actions";
@@ -36,21 +36,21 @@ export default function LiquidacionesPage() {
         </button>
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard label="Por Pagar" value={`$${(totalPending / 1000000).toFixed(2)}M`} icon={Clock} color="text-amber-600" bg="bg-amber-500/10" />
-          <StatCard label="Total Pagado" value={`$${(totalPaid / 1000000).toFixed(2)}M`} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-500/10" />
-          <StatCard label="Liquidaciones" value={data.length.toString()} icon={FileText} color="text-blue-600" bg="bg-blue-500/10" />
-          <StatCard label="Periodo" value="Abril 2024" icon={Calendar} color="text-slate-600" bg="bg-slate-500/10" />
-       </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="Por Pagar" value={`$${(totalPending / 1000000).toFixed(2)}M`} icon={Clock} color="text-amber-600" bg="bg-amber-500/10" />
+        <StatCard label="Total Pagado" value={`$${(totalPaid / 1000000).toFixed(2)}M`} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-500/10" />
+        <StatCard label="Liquidaciones" value={data.length.toString()} icon={FileText} color="text-blue-600" bg="bg-blue-500/10" />
+        <StatCard label="Periodo" value="Abril 2024" icon={Calendar} color="text-slate-600" bg="bg-slate-500/10" />
+      </div>
 
       <div className="glass rounded-[2.5rem] overflow-hidden shadow-xl">
         <div className="p-8 border-b">
           <h3 className="font-bold text-lg tracking-tight">Registro de Liquidaciones</h3>
         </div>
-        
+
         <div className="overflow-x-auto min-h-[300px]">
           {loading ? (
-             <div className="py-20 text-center"><Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" /></div>
+            <div className="py-20 text-center"><Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" /></div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
@@ -67,7 +67,7 @@ export default function LiquidacionesPage() {
                   <motion.tr key={liq.id} className="hover:bg-slate-50/20 transition-colors group">
                     <td className="px-8 py-5">
                       <p className="text-sm font-bold">{liq.doctor}</p>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">MAPA Service</p>
+                      <p className="text-[10px] uppercase font-bold text-slate-400">CARDIO Service</p>
                     </td>
                     <td className="px-6 py-5"><span className="text-sm font-black">{liq.total_estudios}</span></td>
                     <td className="px-6 py-5"><div className="font-black text-blue-600">${Number(liq.total).toLocaleString()}</div></td>
