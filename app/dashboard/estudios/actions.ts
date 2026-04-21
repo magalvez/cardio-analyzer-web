@@ -53,7 +53,7 @@ export async function getStudies(page = 1, pageSize = 10, search = "", filters: 
       SELECT count(*) 
       FROM estudios e
       JOIN pacientes p ON e.paciente_id = p.id
-      ${classFilter ? sql`LEFT JOIN resultados_ia r ON e.id = r.estudio_id` : sql``}
+      ${filters.classification ? sql`LEFT JOIN resultados_ia r ON e.id = r.estudio_id` : sql``}
       WHERE 1=1
       ${roleFilter}
       ${searchFilter}
@@ -64,7 +64,7 @@ export async function getStudies(page = 1, pageSize = 10, search = "", filters: 
 
   return {
     studies,
-    total: parseInt(totalResult.count)
+    total: parseInt(totalResult[0]?.count || "0")
   };
 }
 

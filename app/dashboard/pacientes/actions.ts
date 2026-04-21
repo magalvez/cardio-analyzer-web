@@ -74,6 +74,6 @@ export async function getPatients(page = 1, pageSize = 10, search = "", filters:
   ]);
   return {
     patients,
-    total: parseInt(totalResult.count)
+    total: parseInt(totalResult[0]?.count || "0")
   };
 }
