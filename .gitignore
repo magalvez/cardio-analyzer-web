@@ -19,6 +19,7 @@
 
 # production
 /build
+/scratch
 
 # misc
 .DS_Store
