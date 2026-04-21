@@ -193,7 +193,7 @@ export default function PacientesPage() {
                     {p.ultimo_estudio_id ? (
                       <Link 
                         href={`/dashboard/estudios/${p.ultimo_estudio_id}`}
-                        className="inline-flex p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all opacity-0 group-hover:opacity-100"
+                        className="inline-flex p-2 bg-slate-50  rounded-lg shadow-sm border border-slate-100 hover:bg-white hover:border-slate-200 transition-all"
                         title="Ver último estudio"
                       >
                         <History className="w-4 h-4 text-slate-400" />

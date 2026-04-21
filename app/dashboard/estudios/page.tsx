@@ -281,7 +281,7 @@ export function EstudiosContent() {
                         </span>
                       </td>
                       <td className="px-8 py-5 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-2 transition-opacity">
                           <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-slate-600 ">
                             <Eye className="w-4 h-4" />
                           </Link>
