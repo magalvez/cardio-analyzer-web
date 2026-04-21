@@ -91,6 +91,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
 
 export default function ReportEditor({ content, onChange }: { content: string, onChange: (html: string) => void }) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,

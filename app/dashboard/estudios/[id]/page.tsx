@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ReportEditor from "@/components/editor";
-import { getStudyDetail, saveStudyReport, approveStudy } from "./actions";
+import { getStudyDetail, saveStudyReport, approveStudy, type StudyDetail } from "./actions";
 import { exportStudyWord } from "@/app/dashboard/estudios/actions";
 
 const classificationColors: Record<string, string> = {
@@ -38,7 +38,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [study, setStudy] = useState<any>(null);
+  const [study, setStudy] = useState<StudyDetail | null>(null);
   const [activeTab, setActiveTab] = useState("analisis");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [reportContent, setReportContent] = useState("");
@@ -57,6 +57,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
   }, [id]);
 
   const handleSave = async () => {
+    if (!study) return;
     setSaving(true);
     try {
       await saveStudyReport(id, reportContent);
@@ -68,6 +69,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
   };
 
   const handleApprove = async () => {
+    if (!study) return;
     setApproving(true);
     try {
       await approveStudy(id, reportContent);
@@ -91,6 +93,7 @@ export default function EstudioDetallePage({ params }: { params: Promise<{ id: s
   };
 
   const handleDownload = async () => {
+    if (!study) return;
     setDownloading(true);
     const base64 = await exportStudyWord(id, reportContent);
     const link = document.createElement('a');
@@ -446,7 +449,7 @@ function Lightbox({ src, onClose }: { src: string, onClose: () => void }) {
             y: position.y,
             cursor: scale > 1 ? "grab" : "default"
           }}
-          whileActive={{ cursor: "grabbing" }}
+          whileTap={{ cursor: "grabbing" }}
           transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
           className="relative max-w-4xl w-full h-full flex items-center justify-center shadow-2xl"
         >

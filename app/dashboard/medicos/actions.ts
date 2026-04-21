@@ -78,7 +78,7 @@ export async function createUser(data: {
             if (data.role === 'medico') {
                 const [medico] = await sql`
                     INSERT INTO medicos (clinica_id, nombre_completo, especialidad, telegram_user_id, telegram_username)
-                    VALUES (${session.clinica_id}, ${data.name}, ${data.specialty || 'General'}, ${data.telegram_user_id ? BigInt(data.telegram_user_id) : null}, ${data.telegram_username || null})
+                    VALUES (${session.clinica_id}, ${data.name}, ${data.specialty || 'General'}, ${data.telegram_user_id || null}, ${data.telegram_username || null})
                     RETURNING id
                 `;
                 medico_id = medico.id;
@@ -117,7 +117,7 @@ export async function updateUser(id: string, data: {
                         UPDATE medicos SET 
                             nombre_completo = ${data.name},
                             especialidad = ${data.specialty || 'General'},
-                            telegram_user_id = ${data.telegram_user_id ? BigInt(data.telegram_user_id) : null},
+                            telegram_user_id = ${data.telegram_user_id || null},
                             telegram_username = ${data.telegram_username || null},
                             updated_at = now()
                         WHERE id = ${user.medico_id}
@@ -125,7 +125,7 @@ export async function updateUser(id: string, data: {
                 } else {
                     const [medico] = await sql`
                         INSERT INTO medicos (clinica_id, nombre_completo, especialidad, telegram_user_id, telegram_username)
-                        VALUES (${session.clinica_id}, ${data.name}, ${data.specialty || 'General'}, ${data.telegram_user_id ? BigInt(data.telegram_user_id) : null}, ${data.telegram_username || null})
+                        VALUES (${session.clinica_id}, ${data.name}, ${data.specialty || 'General'}, ${data.telegram_user_id || null}, ${data.telegram_username || null})
                         RETURNING id
                     `;
                     await sql`UPDATE usuarios SET medico_id = ${medico.id} WHERE id = ${id}`;

@@ -3,9 +3,25 @@
 
 import sql from "@/lib/db";
 import { getSession } from "@/lib/auth";
-import HTMLToDOCX from "html-to-docx";
 
-export async function getStudyDetail(id: string) {
+export interface StudyDetail {
+  id: string;
+  estado: string;
+  paciente_id: string;
+  patient_name: string;
+  patient_id: string;
+  patient_age: number;
+  patient_sex: string;
+  motivo_consulta: string;
+  informe_html?: string;
+  recibido_at: string;
+  firmado_at?: string;
+  results: any;
+  imageUrls: string[];
+  guia_usada?: string;
+}
+
+export async function getStudyDetail(id: string): Promise<StudyDetail | null> {
   const session = await getSession();
   if (!session) throw new Error("No session");
 
@@ -54,9 +70,9 @@ export async function getStudyDetail(id: string) {
   const imageUrls = images.map(img => `/api/images/${img.r2_key_original}`);
 
   return {
-    ...study,
+    ...(study as any),
     imageUrls: imageUrls
-  };
+  } as StudyDetail;
 }
 
 export async function saveStudyReport(estudio_id: string, html: string) {
