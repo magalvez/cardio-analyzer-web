@@ -10,7 +10,9 @@ import {
   ArrowDownRight,
   Activity,
   Loader2,
-  Info
+  Info,
+  ChevronDown,
+  Filter
 } from "lucide-react";
 import { 
   AreaChart, 
@@ -21,18 +23,39 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-import { getDashboardStats, exportAnnualReport } from "./actions";
+import { getDashboardStats, exportAnnualReport, getCurrentUser, getClinicDoctors } from "./actions";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [exporting, setExporting] = useState(false);
   const [daysRange, setDaysRange] = useState(15);
+  
+  // Doctor Filter State
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      getCurrentUser().then(setCurrentUser),
+      getClinicDoctors().then(setDoctors)
+    ]).catch(console.error);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
-    getDashboardStats(daysRange).then(setStats).finally(() => setLoading(false));
-  }, [daysRange]);
+    getDashboardStats(daysRange, selectedDoctors)
+      .then(setStats)
+      .finally(() => setLoading(false));
+  }, [daysRange, selectedDoctors]);
+
+  const toggleDoctor = (id: string) => {
+    setSelectedDoctors(prev => 
+      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+    );
+  };
 
   if (loading && !stats) {
      return (
@@ -54,42 +77,42 @@ export default function DashboardPage() {
     { 
       name: "Total Estudios", 
       value: safeStats.kpis.total, 
-      change: safeStats.kpis.change || "+0%", 
-      trend: parseFloat(safeStats.kpis.change) >= 0 ? "up" : "down", 
+      change: safeStats.kpis.totalChange || "+0%", 
+      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down", 
       icon: Activity, 
       color: "text-blue-600", 
       bg: "bg-blue-500/10",
-      info: "Comparativa porcentual del volumen total de estudios entre los últimos 14 días y el periodo anterior de 14 días."
+      info: "Comparativa porcentual del volumen total de estudios entre los últimos 14 días y el periodo anterior."
     },
     { 
       name: "Pendientes", 
       value: safeStats.kpis.pendientes, 
-      change: "-2", 
-      trend: "down", 
+      change: safeStats.kpis.pendingChange || "0", 
+      trend: parseFloat(safeStats.kpis.pendingChange) <= 0 ? "up" : "down", // Lower pending is better
       icon: Clock, 
       color: "text-amber-600", 
       bg: "bg-amber-500/10",
-      info: "Cantidad de estudios en proceso (Recibido, Procesando, Revisión) que requieren atención del equipo médico."
+      info: "Diferencia neta en la cantidad de estudios pendientes respecto al periodo anterior."
     },
     { 
       name: "Siguiente Forecast", 
       value: Math.round(safeStats.kpis.total * 1.15), 
-      change: "+15%", 
-      trend: "up", 
+      change: safeStats.kpis.totalChange || "+0%", 
+      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down", 
       icon: Users, 
       color: "text-rose-600", 
       bg: "bg-rose-500/10",
-      info: "Proyección estadística estimada (+15%) del volumen de estudios para el cierre del ciclo actual basada en la tendencia."
+      info: "Proyección estimada (+15%) del volumen para el cierre del ciclo basada en la tendencia actual."
     },
     { 
       name: "Aprobados", 
       value: safeStats.kpis.aprobados, 
-      change: "+8%", 
-      trend: "up", 
+      change: safeStats.kpis.approvedChange || "+0%", 
+      trend: parseFloat(safeStats.kpis.approvedChange) >= 0 ? "up" : "down", 
       icon: CheckCircle2, 
       color: "text-emerald-600", 
       bg: "bg-emerald-500/10",
-      info: "Porcentaje de estudios que ya cuentan con firma electrónica y diagnóstico validado."
+      info: "Variación porcentual en la cantidad de diagnósticos firmados comparado con el periodo anterior."
     },
   ];
 
@@ -101,6 +124,55 @@ export default function DashboardPage() {
           <p className="text-slate-500  mt-1">Sincronizado con datos reales de la clínica.</p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Doctor Multi-Select Filter (Admin Only) */}
+          {currentUser?.rol === 'admin' && doctors.length > 0 && (
+            <div className="relative">
+              <button 
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-700 flex items-center gap-2 shadow-sm hover:border-blue-400 transition-all active:scale-95"
+              >
+                <Filter className="w-4 h-4 text-blue-500" />
+                <span>
+                  {selectedDoctors.length === 0 ? "Todos los Médicos" : 
+                   selectedDoctors.length === 1 ? doctors.find(d => d.id === selectedDoctors[0])?.name :
+                   `${selectedDoctors.length} Médicos`}
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isFilterOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)} />
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50 overflow-hidden"
+                  >
+                    <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                      <button 
+                        onClick={() => setSelectedDoctors([])}
+                        className={`w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-colors mb-1 ${selectedDoctors.length === 0 ? 'bg-blue-50 text-blue-600' : 'hover:bg-slate-50 text-slate-600'}`}
+                      >
+                        Todos los Médicos
+                      </button>
+                      <div className="h-px bg-slate-100 my-1 mx-2" />
+                      {doctors.map((doc) => (
+                        <button
+                          key={doc.id}
+                          onClick={() => toggleDoctor(doc.id)}
+                          className={`w-full text-left px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-between ${selectedDoctors.includes(doc.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-slate-50 text-slate-600'}`}
+                        >
+                          <span className="truncate pr-2">{doc.name}</span>
+                          {selectedDoctors.includes(doc.id) && <CheckCircle2 className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </div>
+          )}
+
           <button 
             onClick={async () => {
               setExporting(true);
@@ -128,45 +200,64 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiData.map((stat, i) => (
-          <motion.div
-            key={stat.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="glass p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all group cursor-default relative overflow-visible"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`${stat.bg} p-3 rounded-2xl`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className={`flex items-center gap-1 text-sm font-bold ${stat.trend === "up" ? "text-emerald-500" : "text-amber-500"}`}>
-                  {stat.change}
-                  {stat.trend === "up" ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+        {kpiData.map((stat, i) => {
+          const numericChange = parseFloat(stat.change);
+          const isPositive = numericChange > 0;
+          const isNegative = numericChange < 0;
+          
+          // Color logic based on sentiment (Neutral for zero)
+          let colorClass = "text-slate-400";
+          if (stat.name === "Pendientes") {
+            // Pendientes: Negative is Good (Green), Positive is Warning (Amber)
+            if (isNegative) colorClass = "text-emerald-500";
+            if (isPositive) colorClass = "text-amber-500";
+          } else {
+            // Others: Positive is Good (Green), Negative is Warning (Amber)
+            if (isPositive) colorClass = "text-emerald-500";
+            if (isNegative) colorClass = "text-amber-500";
+          }
+
+          return (
+            <motion.div
+              key={stat.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className="glass p-6 rounded-[2rem] shadow-sm hover:shadow-2xl hover:scale-[1.02] transition-all group cursor-default relative overflow-visible"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`${stat.bg} p-3 rounded-2xl`}>
+                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 
-                {/* Tooltip Wrapper */}
-                <div className="relative group/tooltip">
-                  <Info className="w-4 h-4 text-slate-300 hover:text-blue-500 cursor-help transition-colors" />
-                  <div className="absolute bottom-full right-0 mb-2 w-48 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50">
-                    <div className="bg-slate-900 text-white text-[10px] p-3 rounded-xl shadow-xl font-medium leading-relaxed relative">
-                      {stat.info}
-                      <div className="absolute top-full right-2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                <div className="flex items-center gap-2">
+                  <div className={`flex items-center gap-1 text-sm font-bold ${colorClass}`}>
+                    {stat.change}
+                    {isPositive && <ArrowUpRight className="w-4 h-4" />}
+                    {isNegative && <ArrowDownRight className="w-4 h-4" />}
+                  </div>
+                  
+                  {/* Tooltip Wrapper */}
+                  <div className="relative group/tooltip">
+                    <Info className="w-4 h-4 text-slate-300 hover:text-blue-500 cursor-help transition-colors" />
+                    <div className="absolute bottom-full right-0 mb-2 w-48 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50">
+                      <div className="bg-slate-900 text-white text-[10px] p-3 rounded-xl shadow-xl font-medium leading-relaxed relative">
+                        {stat.info}
+                        <div className="absolute top-full right-2 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1" />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-slate-400  uppercase tracking-widest">{stat.name}</p>
-              <h3 className="text-3xl font-bold text-slate-900  mt-1 leading-none tracking-tight">
-                {stat.value}
-              </h3>
-            </div>
-          </motion.div>
-        ))}
+              <div>
+                <p className="text-xs font-bold text-slate-400  uppercase tracking-widest">{stat.name}</p>
+                <h3 className="text-3xl font-bold text-slate-900  mt-1 leading-none tracking-tight">
+                  {stat.value}
+                </h3>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

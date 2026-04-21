@@ -4,14 +4,38 @@ import sql from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import HTMLToDOCX from "html-to-docx";
 
-export async function getDashboardStats(days: number = 14) {
+export async function getCurrentUser() {
+  return await getSession();
+}
+
+export async function getClinicDoctors() {
+  const session = await getSession();
+  if (!session || session.rol !== 'admin') throw new Error("Unauthorized");
+  return await sql`
+    SELECT id, nombre_completo as name 
+    FROM medicos 
+    WHERE clinica_id = ${session.clinica_id} 
+    AND activo = true
+    ORDER BY nombre_completo ASC
+  `;
+}
+
+export async function getDashboardStats(days: number = 14, medicoIds: string[] = []) {
   try {
     const session = await getSession();
     if (!session) throw new Error("No session");
 
-    const roleFilter = session.rol === 'admin'
-      ? sql`AND clinica_id = ${session.clinica_id}`
-      : sql`AND medico_solicitante_id = ${session.medico_id}`;
+    // Dynamic Filter Builder
+    const buildFilter = (tableAlias: string = '') => {
+      const prefix = tableAlias ? sql`${sql(tableAlias)}.` : sql``;
+      if (session.rol === 'admin') {
+        if (medicoIds && medicoIds.length > 0) {
+          return sql`AND ${prefix}clinica_id = ${session.clinica_id} AND ${prefix}medico_solicitante_id IN ${sql(medicoIds)}`;
+        }
+        return sql`AND ${prefix}clinica_id = ${session.clinica_id}`;
+      }
+      return sql`AND ${prefix}medico_solicitante_id = ${session.medico_id}`;
+    };
 
     // Parallel execution of all data requirements
     const [countsResult, distributionResult, volumeResult, prevCountsResult, clinicResult] = await Promise.all([
@@ -22,7 +46,7 @@ export async function getDashboardStats(days: number = 14) {
           count(*) FILTER (WHERE estado IN ('revision', 'completado', 'procesando', 'recibido')) as pendientes,
           count(*) FILTER (WHERE estado = 'firmado') as aprobados
         FROM estudios
-        WHERE 1=1 ${roleFilter}
+        WHERE 1=1 ${buildFilter()}
       `,
       // 2. Classification Distribution (inclusive of zero values)
       sql`
@@ -39,9 +63,7 @@ export async function getDashboardStats(days: number = 14) {
         FROM categories c
         LEFT JOIN resultados_ia r ON c.clasificacion = r.clasificacion
         LEFT JOIN estudios e ON e.id = r.estudio_id AND (
-          ${session.rol === 'admin'
-          ? sql`e.clinica_id = ${session.clinica_id}`
-          : sql`e.medico_solicitante_id = ${session.medico_id}`}
+          1=1 ${buildFilter('e')}
         )
         GROUP BY c.clasificacion, c.label
         ORDER BY 
@@ -58,34 +80,37 @@ export async function getDashboardStats(days: number = 14) {
           count(*) as total
         FROM estudios
         WHERE recibido_at >= now() - (interval '1 day' * ${days})
-        ${roleFilter}
+        ${buildFilter()}
         GROUP BY 1
         ORDER BY 1 ASC
       `,
       // 4. Previous Period Counts
       sql`
-        SELECT count(*) as total
+        SELECT 
+          count(*) as total,
+          count(*) FILTER (WHERE estado IN ('revision', 'completado', 'procesando', 'recibido')) as pendientes,
+          count(*) FILTER (WHERE estado = 'firmado') as aprobados
         FROM estudios
         WHERE recibido_at >= now() - (interval '1 day' * ${days * 2})
         AND recibido_at < now() - (interval '1 day' * ${days})
-        ${roleFilter}
+        ${buildFilter()}
       `,
       // 5. Clinic Data
       sql`SELECT nombre FROM clinicas WHERE id = ${session.clinica_id}`
     ]);
 
     const counts = countsResult[0] || { total: 0, pendientes: 0, aprobados: 0 };
-    const prevCounts = prevCountsResult[0] || { total: 0 };
+    const prevCounts = prevCountsResult[0] || { total: 0, pendientes: 0, aprobados: 0 };
     
-    // Process total change
-    const totalActual = parseInt(counts.total);
-    const totalPrev = parseInt(prevCounts.total);
-    let totalChange = 0;
-    if (totalPrev > 0) {
-      totalChange = parseFloat(((totalActual - totalPrev) / totalPrev * 100).toFixed(1));
-    } else if (totalActual > 0) {
-      totalChange = 100;
-    }
+    // Helper to calculate percentage change
+    const calculateChange = (actual: number, prev: number) => {
+      if (prev > 0) return parseFloat(((actual - prev) / prev * 100).toFixed(1));
+      return actual > 0 ? 100 : 0;
+    };
+
+    const totalChange = calculateChange(parseInt(counts.total), parseInt(prevCounts.total));
+    const pendingChange = parseInt(counts.pendientes) - parseInt(prevCounts.pendientes);
+    const approvedChange = calculateChange(parseInt(counts.aprobados), parseInt(prevCounts.aprobados));
 
     const distribution = distributionResult || [];
 
@@ -126,10 +151,12 @@ export async function getDashboardStats(days: number = 14) {
 
     return {
       kpis: {
-        total: totalActual,
+        total: parseInt(counts.total),
         pendientes: parseInt(counts.pendientes),
         aprobados: parseInt(counts.aprobados),
-        change: totalChange >= 0 ? `+${totalChange}%` : `${totalChange}%`
+        totalChange: totalChange >= 0 ? `+${totalChange}%` : `${totalChange}%`,
+        pendingChange: pendingChange >= 0 ? `+${pendingChange}` : `${pendingChange}`,
+        approvedChange: approvedChange >= 0 ? `+${approvedChange}%` : `${approvedChange}%`
       },
       distribution: distribution,
       volumeData: chartData
