@@ -22,7 +22,12 @@ export default async function DashboardLayout({
         <Sidebar userRole={session?.rol || 'admin'} />
 
         {/* Dynamic Content Wrapper */}
-        <DashboardContentWrapper userEmail={session?.email || 'doctor@clinica.com'}>
+        <DashboardContentWrapper 
+          userEmail={session?.email || 'doctor@clinica.com'}
+          userName={session?.nombre_completo}
+          userRole={session?.rol}
+          userSpecialty={session?.especialidad}
+        >
           {children}
         </DashboardContentWrapper>
       </div>

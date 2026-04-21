@@ -2,7 +2,22 @@
 
 import { Bell, Search, User, Menu } from "lucide-react";
 
-export default function Topbar({ userEmail }: { userEmail: string }) {
+export default function Topbar({
+  userEmail,
+  userName,
+  userRole,
+  userSpecialty
+}: {
+  userEmail: string,
+  userName?: string,
+  userRole?: string,
+  userSpecialty?: string
+}) {
+
+  const displayName = userName || userEmail.split('@')[0];
+  const displayRole = userRole === 'admin' ? 'Administrador' : (userSpecialty || 'Médico');
+  const initial = (userName ? userName[0] : userEmail[0]).toUpperCase();
+
   return (
     <header className="h-20 glass border-b sticky top-0 z-40 px-6 flex items-center justify-between">
       <div className="flex-1" />
@@ -25,14 +40,14 @@ export default function Topbar({ userEmail }: { userEmail: string }) {
         <div className="flex items-center gap-3 pl-2">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-slate-900  leading-tight">
-              {userEmail.split('@')[0]}
+              {displayName}
             </p>
             <p className="text-xs text-slate-500 ">
-              Dr. Mapas
+              {displayRole}
             </p>
           </div>
           <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-            {userEmail[0].toUpperCase()}
+            {initial}
           </div>
         </div>
       </div>

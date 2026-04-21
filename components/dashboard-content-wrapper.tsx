@@ -5,10 +5,16 @@ import Topbar from "./topbar";
 
 export default function DashboardContentWrapper({ 
   children, 
-  userEmail 
+  userEmail,
+  userName,
+  userRole,
+  userSpecialty
 }: { 
   children: React.ReactNode;
   userEmail: string;
+  userName?: string;
+  userRole?: string;
+  userSpecialty?: string;
 }) {
   const { collapsed, isReady } = useSidebar();
 
@@ -26,7 +32,12 @@ export default function DashboardContentWrapper({
         pl-0
       `}
     >
-      <Topbar userEmail={userEmail} />
+      <Topbar 
+        userEmail={userEmail} 
+        userName={userName} 
+        userRole={userRole} 
+        userSpecialty={userSpecialty} 
+      />
       
       <main className="flex-1 p-4 lg:p-8 max-w-[1600px] mx-auto w-full">
         {children}
