@@ -20,11 +20,12 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-import { getDashboardStats } from "./actions";
+import { getDashboardStats, exportAnnualReport } from "./actions";
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     getDashboardStats().then(setStats).finally(() => setLoading(false));
@@ -61,8 +62,28 @@ export default function DashboardPage() {
           <p className="text-slate-500  mt-1">Sincronizado con datos reales de la clínica.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm tracking-wide">
-            Exportar Informe Anual
+          <button 
+            onClick={async () => {
+              setExporting(true);
+              try {
+                const base64 = await exportAnnualReport();
+                const blob = await (await fetch(`data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${base64}`)).blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Informe_Gestion_MAPA_${new Date().getFullYear()}.docx`;
+                a.click();
+              } catch (error) {
+                console.error(error);
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-sm tracking-wide disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+            {exporting ? 'Generando...' : 'Exportar Informe Anual'}
           </button>
         </div>
       </div>

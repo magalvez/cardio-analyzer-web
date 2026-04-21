@@ -4,13 +4,22 @@ import sql from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import HTMLToDOCX from "html-to-docx";
 
-export async function getStudies(page = 1, pageSize = 10, search = "") {
+export async function getStudies(page = 1, pageSize = 10, search = "", filters: { status?: string, classification?: string } = {}) {
   const session = await getSession();
   if (!session) throw new Error("No session");
 
   const offset = (page - 1) * pageSize;
-  const whereSql = search 
+  
+  const searchFilter = search 
     ? sql`AND (p.nombre_completo ILIKE ${'%' + search + '%'} OR p.cedula ILIKE ${'%' + search + '%'})` 
+    : sql``;
+
+  const statusFilter = filters.status 
+    ? sql`AND e.estado = ${filters.status}`
+    : sql``;
+
+  const classFilter = filters.classification
+    ? sql`AND r.clasificacion = ${filters.classification}`
     : sql``;
 
   // Filter based on role
@@ -31,18 +40,15 @@ export async function getStudies(page = 1, pageSize = 10, search = "") {
       r.clasificacion, 
       r.promedio_pas_general, 
       r.promedio_pad_general,
-      r.patron_dipper, 
-      r.resumen_motor, 
-      r.resumen_gemini,
-      r.hipotension_detectada,
-      r.hipotension_diurna_detectada, 
-      r.hipotension_nocturna_detectada
+      r.id as resultado_id
     FROM estudios e
     JOIN pacientes p ON e.paciente_id = p.id
     LEFT JOIN resultados_ia r ON e.id = r.estudio_id
     WHERE 1=1
     ${roleFilter}
-    ${whereSql}
+    ${searchFilter}
+    ${statusFilter}
+    ${classFilter}
     ORDER BY e.recibido_at DESC
     LIMIT ${pageSize} OFFSET ${offset}
   `;
@@ -51,9 +57,12 @@ export async function getStudies(page = 1, pageSize = 10, search = "") {
     SELECT count(*) 
     FROM estudios e
     JOIN pacientes p ON e.paciente_id = p.id
+    LEFT JOIN resultados_ia r ON e.id = r.estudio_id
     WHERE 1=1
     ${roleFilter}
-    ${whereSql}
+    ${searchFilter}
+    ${statusFilter}
+    ${classFilter}
   `;
 
   return {

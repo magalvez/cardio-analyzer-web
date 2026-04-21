@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -36,18 +37,28 @@ const statusStyles: Record<string, string> = {
   cancelado: "bg-rose-100 text-rose-600 ",
 };
 
-export default function EstudiosPage() {
+export function EstudiosContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || "";
+  
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState(initialSearch);
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [classFilter, setClassFilter] = useState("");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getStudies(page, pageSize, search);
+      const res = await getStudies(page, pageSize, search, {
+        status: statusFilter || undefined,
+        classification: classFilter || undefined
+      });
       setData(res.studies);
       setTotal(res.total);
     } catch (error) {
@@ -55,7 +66,12 @@ export default function EstudiosPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search]);
+  }, [page, search, statusFilter, classFilter, pageSize]);
+
+  // Reset to page 1 when filters or search change
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, classFilter, pageSize]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -98,10 +114,89 @@ export default function EstudiosPage() {
               className="bg-white  border rounded-xl py-2.5 pl-11 pr-4 text-sm w-[250px] outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             />
           </div>
-          <button className="flex items-center gap-2 bg-white  border rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700  hover:bg-slate-50  transition-all shadow-sm">
-            <Filter className="w-4 h-4" />
-            Filtros
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 border rounded-xl px-4 py-2.5 text-sm font-bold transition-all shadow-sm ${showFilters ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'}`}
+            >
+              <Filter className="w-4 h-4" />
+              Filtros
+              {(statusFilter || classFilter) && (
+                <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showFilters && (
+                <>
+                  {/* Backdrop for click outside */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowFilters(false)} 
+                  />
+                  
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 mt-3 w-80 glass rounded-[2.5rem] shadow-2xl p-7 z-50 border border-white/50"
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                       <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-800">Filtros Avanzados</h3>
+                       <button 
+                         onClick={() => setShowFilters(false)}
+                         className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                       >
+                         <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                         </svg>
+                       </button>
+                    </div>
+
+                    <div className="space-y-6">
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Estado del Estudio</label>
+                      <select 
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full bg-slate-50  border-none rounded-xl py-3 px-4 text-sm font-bold outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-500/20"
+                      >
+                        <option value="">Cualquier estado</option>
+                        <option value="recibido">Recibido</option>
+                        <option value="procesando">Procesando</option>
+                        <option value="revision">Revisión</option>
+                        <option value="firmado">Firmado</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-3">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Clasificación</label>
+                      <select 
+                        value={classFilter}
+                        onChange={(e) => setClassFilter(e.target.value)}
+                        className="w-full bg-slate-50  border-none rounded-xl py-3 px-4 text-sm font-bold outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-500/20"
+                      >
+                        <option value="">Cualquier clasificación</option>
+                        <option value="normal">Normal</option>
+                        <option value="elevada">PA Elevada</option>
+                        <option value="anormal">HTA Confirmada</option>
+                      </select>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100">
+                       <button 
+                         onClick={() => { setStatusFilter(""); setClassFilter(""); setShowFilters(false); }}
+                         className="w-full py-3 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition-all border border-rose-100"
+                       >
+                         Limpiar todos los filtros
+                       </button>
+                    </div>
+                  </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -220,31 +315,58 @@ export default function EstudiosPage() {
         </div>
 
         {/* Footer / Pagination */}
-        <div className="p-6 border-t border-slate-100  flex items-center justify-between">
-          <p className="text-sm text-slate-500 font-medium">
-            Mostrando <span className="text-slate-900  font-bold">{Math.min((page - 1) * pageSize + 1, total)} - {Math.min(page * pageSize, total)}</span> de <span className="text-slate-900  font-bold">{total}</span> estudios
-          </p>
+        <div className="p-8 border-t border-slate-100  flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-slate-500 font-medium">
+              Mostrando <span className="text-slate-900  font-bold">{Math.min((page - 1) * pageSize + 1, total)} - {Math.min(page * pageSize, total)}</span> de <span className="text-slate-900  font-bold">{total}</span> estudios
+            </p>
+            <div className="h-4 w-px bg-slate-200" />
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-tighter">Filas:</label>
+              <select 
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="bg-slate-50 border-none rounded-lg text-xs font-black py-1 px-2 outline-none ring-1 ring-slate-100 focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
+
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1 || loading}
-              className="p-2 border rounded-xl hover:bg-slate-50  transition-colors disabled:opacity-30 cursor-pointer"
+              className="px-4 py-2 border rounded-xl hover:bg-slate-50 transition-all font-bold text-xs text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <ChevronLeft className="w-4 h-4" />
+              Anterior
             </button>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-bold px-4">Página {page}</span>
+            <div className="flex items-center px-4">
+              <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Página <span className="text-slate-900">{page}</span></span>
             </div>
             <button 
               onClick={() => setPage(p => p + 1)}
               disabled={page * pageSize >= total || loading}
-              className="p-2 border rounded-xl hover:bg-slate-50  transition-colors disabled:opacity-30 cursor-pointer"
+              className="px-4 py-2 border rounded-xl hover:bg-slate-50 transition-all font-bold text-xs text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
             >
+              Siguiente
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function EstudiosPage() {
+  return (
+    <Suspense fallback={<div className="p-20 text-center"><Loader2 className="animate-spin mx-auto w-10 h-10" /></div>}>
+      <EstudiosContent />
+    </Suspense>
   );
 }

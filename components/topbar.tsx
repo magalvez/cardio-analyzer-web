@@ -5,15 +5,7 @@ import { Bell, Search, User, Menu } from "lucide-react";
 export default function Topbar({ userEmail }: { userEmail: string }) {
   return (
     <header className="h-20 glass border-b sticky top-0 z-40 px-6 flex items-center justify-between">
-      {/* Search Bar */}
-      <div className="hidden md:flex relative w-full max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input 
-          type="text" 
-          placeholder="Buscar pacientes o estudios..."
-          className="w-full bg-slate-100  border-none rounded-full py-2.5 pl-11 pr-4 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-        />
-      </div>
+      <div className="flex-1" />
 
       <div className="flex lg:hidden items-center gap-4">
         <button className="p-2 hover:bg-slate-100  rounded-lg transition-colors">

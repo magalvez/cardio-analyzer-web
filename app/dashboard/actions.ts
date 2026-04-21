@@ -2,6 +2,7 @@
 
 import sql from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import HTMLToDOCX from "html-to-docx";
 
 export async function getDashboardStats() {
   try {
@@ -116,5 +117,86 @@ export async function getDashboardStats() {
       distribution: [],
       volumeData: []
     };
+  }
+}
+
+export async function exportAnnualReport() {
+  try {
+    const session = await getSession();
+    if (!session) throw new Error("No session");
+
+    const [clinic] = await sql`SELECT nombre FROM clinicas WHERE id = ${session.clinica_id}`;
+    const stats = await getDashboardStats();
+
+    const year = new Date().getFullYear();
+    const date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; color: #0f172a;">
+        <h1 style="text-align: center; color: #1d4ed8; font-size: 24pt;">Informe de Gestión Clínica MAPA</h1>
+        <h2 style="text-align: center; color: #64748b; font-size: 16pt;">${clinic?.nombre || 'Clínica General'}</h2>
+        <p style="text-align: center;">Periodo: Enero ${year} - Diciembre ${year}</p>
+        <p style="text-align: center; font-size: 10pt; color: #94a3b8;">Fecha de generación: ${date}</p>
+        
+        <hr style="border: 0.5pt solid #e2e8f0; margin: 40px 0;"/>
+        
+        <h3 style="color: #1e40af; border-bottom: 2pt solid #3b82f6; padding-bottom: 5px;">1. Resumen Operativo</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <tr>
+            <td style="padding: 15px; border: 1pt solid #f1f5f9; background-color: #f8fafc; text-align: center;">
+              <div style="font-size: 10pt; color: #64748b; font-weight: bold;">TOTAL ESTUDIOS</div>
+              <div style="font-size: 20pt; font-weight: bold; color: #1e293b;">${stats.kpis.total}</div>
+            </td>
+            <td style="padding: 15px; border: 1pt solid #f1f5f9; background-color: #f8fafc; text-align: center;">
+              <div style="font-size: 10pt; color: #64748b; font-weight: bold;">PENDIENTES</div>
+              <div style="font-size: 20pt; font-weight: bold; color: #d97706;">${stats.kpis.pendientes}</div>
+            </td>
+            <td style="padding: 15px; border: 1pt solid #f1f5f9; background-color: #f8fafc; text-align: center;">
+              <div style="font-size: 10pt; color: #64748b; font-weight: bold;">APROBADOS</div>
+              <div style="font-size: 20pt; font-weight: bold; color: #059669;">${stats.kpis.aprobados}</div>
+            </td>
+          </tr>
+        </table>
+
+        <h3 style="color: #1e40af; border-bottom: 2pt solid #3b82f6; padding-bottom: 5px; margin-top: 40px;">2. Distribución de Diagnósticos</h3>
+        <p style="font-size: 11pt; color: #475569;">A continuación se detalla la clasificación clínica de los estudios procesados durante el periodo:</p>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+          <thead>
+            <tr style="background-color: #1e293b; color: white;">
+              <th style="padding: 12px; text-align: left; border: 1pt solid #1e293b;">Clasificación Clínica</th>
+              <th style="padding: 12px; text-align: center; border: 1pt solid #1e293b;">Cantidad</th>
+              <th style="padding: 12px; text-align: center; border: 1pt solid #1e293b;">Porcentaje (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stats.distribution.map((dist: any) => `
+              <tr>
+                <td style="padding: 12px; border: 1pt solid #e2e8f0; font-weight: bold;">${dist.label}</td>
+                <td style="padding: 12px; border: 1pt solid #e2e8f0; text-align: center;">${dist.count}</td>
+                <td style="padding: 12px; border: 1pt solid #e2e8f0; text-align: center; color: #3b82f6; font-weight: bold;">${dist.percentage}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div style="margin-top: 100px; text-align: center; border-top: 1pt solid #e2e8f0; padding-top: 20px;">
+          <p style="font-size: 9pt; color: #94a3b8;">Este documento es un reporte estadístico generado por el sistema MAPA Cardio Analyzer.</p>
+          <p style="font-size: 9pt; color: #94a3b8;">&copy; ${year} Cardio Analyzer Labs. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    `;
+
+    const docBuffer = await HTMLToDOCX(html, null, {
+      margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 }, // 1 inch
+      header: true,
+      footer: true,
+      pageNumber: true,
+    });
+
+    return docBuffer.toString('base64');
+  } catch (error) {
+    console.error("Annual Report Error:", error);
+    throw error;
   }
 }
