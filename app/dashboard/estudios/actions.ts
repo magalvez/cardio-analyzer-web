@@ -87,3 +87,23 @@ export async function exportStudyWord(id: string, html?: string) {
 
   return docBuffer.toString('base64');
 }
+
+export async function signStudy(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error("No session");
+
+  const roleCondition = session.rol === 'admin' 
+    ? sql`AND clinica_id = ${session.clinica_id}`
+    : sql`AND medico_solicitante_id = ${session.medico_id}`;
+
+  await sql`
+    UPDATE estudios 
+    SET 
+      estado = 'firmado',
+      firmado_at = now()
+    WHERE id = ${id} 
+    ${roleCondition}
+  `;
+  
+  return { success: true };
+}

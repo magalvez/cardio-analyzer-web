@@ -9,12 +9,14 @@ import {
   Download, 
   Eye, 
   CheckCircle,
+  Check,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
-  Loader2
+  Loader2,
+  Info
 } from "lucide-react";
-import { getStudies, exportStudyWord } from "./actions";
+import { getStudies, exportStudyWord, signStudy } from "./actions";
 import Link from "next/link";
 
 const classificationColors: Record<string, string> = {
@@ -35,6 +37,7 @@ const statusStyles: Record<string, string> = {
   revision: "bg-amber-100 text-amber-600 ",
   firmado: "bg-emerald-100 text-emerald-600 ",
   cancelado: "bg-rose-100 text-rose-600 ",
+  normal: "bg-blue-100 text-blue-800 ",
 };
 
 export function EstudiosContent() {
@@ -51,6 +54,9 @@ export function EstudiosContent() {
   const [showFilters, setShowFilters] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [classFilter, setClassFilter] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [selectedIdForSign, setSelectedIdForSign] = useState<string | null>(null);
+  const [showStatus, setShowStatus] = useState<{ type: 'success' | 'error', title: string, message: string } | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -79,6 +85,34 @@ export function EstudiosContent() {
     }, 500); // Debounce search
     return () => clearTimeout(timer);
   }, [fetchData]);
+
+  const [signingId, setSigningId] = useState<string | null>(null);
+
+  const handleSign = async () => {
+    if (!selectedIdForSign) return;
+    setSigningId(selectedIdForSign);
+    try {
+      await signStudy(selectedIdForSign);
+      await fetchData(); // Refresh list to show new status
+      setShowConfirm(false);
+      setShowStatus({
+        type: 'success',
+        title: 'Estudio Firmado',
+        message: 'El examen ha sido formalizado y firmado correctamente.'
+      });
+    } catch (e) {
+      console.error("Error signing:", e);
+      setShowConfirm(false);
+      setShowStatus({
+        type: 'error',
+        title: 'Fallo en Firma',
+        message: 'Hubo un problema al intentar firmar el estudio.'
+      });
+    } finally {
+      setSigningId(null);
+      setSelectedIdForSign(null);
+    }
+  };
 
   const handleDownloadQuick = async (id: string, patientName: string) => {
     try {
@@ -281,30 +315,43 @@ export function EstudiosContent() {
                         </span>
                       </td>
                       <td className="px-8 py-5 text-right">
-                        <div className="flex items-center justify-end gap-2 transition-opacity">
-                          <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-slate-600 ">
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <button 
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                            className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-emerald-600 disabled:opacity-30"
-                            disabled={study.estado === 'firmado'}
-                            title="Firmar estudio"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={(e) => { 
-                              e.preventDefault(); 
-                              e.stopPropagation(); 
-                              handleDownloadQuick(study.id, study.patient); 
-                            }}
-                            className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-blue-600"
-                            title="Descargar Word"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
+                        {study.estado !== 'cancelado' && (
+                          <div className="flex items-center justify-end gap-2 transition-opacity">
+                            <Link href={`/dashboard/estudios/${study.id}`} className="p-2 hover:bg-white  rounded-lg shadow-sm border border-transparent hover:border-slate-200  transition-all text-slate-600 ">
+                              <Eye className="w-4 h-4" />
+                            </Link>
+                            {study.estado === 'normal' && (
+                              <button 
+                                onClick={(e) => { 
+                                  e.preventDefault(); 
+                                  e.stopPropagation(); 
+                                  setSelectedIdForSign(study.id);
+                                  setShowConfirm(true);
+                                }}
+                                className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-emerald-600 disabled:opacity-30 flex items-center justify-center min-w-[36px] cursor-pointer"
+                                disabled={study.estado === 'firmado' || signingId === study.id}
+                                title="Firma Rápida (Solo Normales)"
+                              >
+                                {signingId === study.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                              </button>
+                            )}
+                            <button 
+                              onClick={(e) => { 
+                                e.preventDefault(); 
+                                e.stopPropagation(); 
+                                handleDownloadQuick(study.id, study.patient); 
+                              }}
+                              className="p-2 hover:bg-white rounded-lg shadow-sm border border-transparent hover:border-slate-200 transition-all text-blue-600 cursor-pointer"
+                              title="Descargar Word"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </motion.tr>
                   ))
@@ -359,7 +406,79 @@ export function EstudiosContent() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirm && (
+          <Portal>
+            <ConfirmModal
+              onConfirm={handleSign}
+              onCancel={() => setShowConfirm(false)}
+              loading={!!signingId}
+            />
+          </Portal>
+        )}
+      </AnimatePresence>
+      {/* Status Modal */}
+      <AnimatePresence>
+        {showStatus && (
+          <Portal>
+            <StatusModal
+              {...showStatus}
+              onClose={() => setShowStatus(null)}
+            />
+          </Portal>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function Portal({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return require("react-dom").createPortal(children, document.body);
+}
+
+function ConfirmModal({ onConfirm, onCancel, loading }: any) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-900/70 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-[0_30px_100px_rgba(0,0,0,0.5)] space-y-6">
+        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+          <Info className={`w-8 h-8 ${loading ? 'animate-pulse' : ''}`} />
+        </div>
+        <div className="text-center space-y-2">
+          <h3 className="text-xl font-black text-slate-900">¿Firmar Estudio?</h3>
+          <p className="text-slate-500 text-sm leading-relaxed">Esta acción formaliza y firma el examen de forma definitiva.</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 px-6 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancelar</button>
+          <button onClick={onConfirm} disabled={loading} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-2xl font-bold shadow-lg shadow-blue-200 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Sí, Firmar"}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function StatusModal({ type, title, message, onClose }: any) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[10000] flex items-center justify-center p-6 bg-slate-950/50 backdrop-blur-sm">
+      <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-[0_30px_100px_rgba(0,0,0,0.5)] text-center space-y-6">
+        <div className={`w-20 h-20 mx-auto rounded-3xl flex items-center justify-center ${type === 'success' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+          {type === 'success' ? <Check className="w-10 h-10" /> : <Info className="w-10 h-10 rotate-180" />}
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-2xl font-black text-slate-900">{title}</h3>
+          <p className="text-slate-500 text-sm leading-relaxed">{message}</p>
+        </div>
+        <button onClick={onClose} className="w-full bg-slate-900 text-white px-6 py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-xl shadow-slate-200">
+          Entendido
+        </button>
+      </motion.div>
+    </motion.div>
   );
 }
 

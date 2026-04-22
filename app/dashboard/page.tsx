@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  Users, 
-  Clock, 
-  CheckCircle2, 
-  ArrowUpRight, 
+import {
+  Users,
+  Clock,
+  CheckCircle2,
+  ArrowUpRight,
   ArrowDownRight,
   Activity,
   Loader2,
@@ -14,24 +14,62 @@ import {
   ChevronDown,
   Filter
 } from "lucide-react";
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 import { getDashboardStats, exportAnnualReport, getCurrentUser, getClinicDoctors } from "./actions";
 
+const USE_MOCK_DATA = false; // CAMBIA A "false" PARA VER DATOS REALES
+
+const MOCK_STATS = {
+  kpis: {
+    total: 1248,
+    pendientes: 42,
+    aprobados: 1156,
+    totalChange: "+18.4%",
+    pendingChange: "-12",
+    approvedChange: "+14.2%"
+  },
+  distribution: [
+    { clasificacion: 'normal', label: 'Normal', count: 562, percentage: '45.1' },
+    { clasificacion: 'elevada', label: 'PA Elevada', count: 374, percentage: '30.0' },
+    { clasificacion: 'anormal', label: 'HTA Confirmada', count: 312, percentage: '24.9' }
+  ],
+  volumeData: Array.from({ length: 30 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (29 - i));
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const base = isWeekend ? 15 : 45;
+    const random = Math.floor(Math.random() * 20);
+    return {
+      date: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+      total: base + random,
+      forecast: null
+    };
+  })
+};
+
+// Add forecast tips to mock data
+if (MOCK_STATS.volumeData.length > 0) {
+  const last = MOCK_STATS.volumeData[MOCK_STATS.volumeData.length - 1];
+  MOCK_STATS.volumeData.push({ date: "Próx. 24h", total: null, forecast: last.total + 5 });
+  MOCK_STATS.volumeData.push({ date: "Próx. 48h", total: null, forecast: last.total + 12 });
+  last.forecast = last.total;
+}
+
 export default function DashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(!USE_MOCK_DATA);
+  const [stats, setStats] = useState<any>(USE_MOCK_DATA ? MOCK_STATS : null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [exporting, setExporting] = useState(false);
   const [daysRange, setDaysRange] = useState(15);
-  
+
   // Doctor Filter State
   const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedDoctors, setSelectedDoctors] = useState<string[]>([]);
@@ -45,6 +83,14 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (USE_MOCK_DATA) {
+      // Slice mock data to match range + the 2 forecast pts we added
+      const slicedVolume = MOCK_STATS.volumeData.slice(-(daysRange + 3));
+      setStats({ ...MOCK_STATS, volumeData: slicedVolume });
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     getDashboardStats(daysRange, selectedDoctors)
       .then(setStats)
@@ -52,18 +98,18 @@ export default function DashboardPage() {
   }, [daysRange, selectedDoctors]);
 
   const toggleDoctor = (id: string) => {
-    setSelectedDoctors(prev => 
+    setSelectedDoctors(prev =>
       prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
     );
   };
 
   if (loading && !stats) {
-     return (
-       <div className="h-[80vh] flex flex-col items-center justify-center p-8 gap-4">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
-          <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Sincronizando con la red CARDIO Analyzer...</p>
-       </div>
-     );
+    return (
+      <div className="h-[80vh] flex flex-col items-center justify-center p-8 gap-4">
+        <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+        <p className="font-bold text-slate-400 uppercase tracking-widest text-sm">Sincronizando con la red CARDIO Analyzer...</p>
+      </div>
+    );
   }
 
   // Safety check for empty stats
@@ -74,43 +120,43 @@ export default function DashboardPage() {
   };
 
   const kpiData = [
-    { 
-      name: "Total Estudios", 
-      value: safeStats.kpis.total, 
-      change: safeStats.kpis.totalChange || "+0%", 
-      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down", 
-      icon: Activity, 
-      color: "text-blue-600", 
+    {
+      name: "Total Estudios",
+      value: safeStats.kpis.total,
+      change: safeStats.kpis.totalChange || "+0%",
+      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down",
+      icon: Activity,
+      color: "text-blue-600",
       bg: "bg-blue-500/10",
       info: "Comparativa porcentual del volumen total de estudios entre los últimos 14 días y el periodo anterior."
     },
-    { 
-      name: "Pendientes", 
-      value: safeStats.kpis.pendientes, 
-      change: safeStats.kpis.pendingChange || "0", 
+    {
+      name: "Pendientes",
+      value: safeStats.kpis.pendientes,
+      change: safeStats.kpis.pendingChange || "0",
       trend: parseFloat(safeStats.kpis.pendingChange) <= 0 ? "up" : "down", // Lower pending is better
-      icon: Clock, 
-      color: "text-amber-600", 
+      icon: Clock,
+      color: "text-amber-600",
       bg: "bg-amber-500/10",
       info: "Diferencia neta en la cantidad de estudios pendientes respecto al periodo anterior."
     },
-    { 
-      name: "Siguiente Forecast", 
-      value: Math.round(safeStats.kpis.total * 1.15), 
-      change: safeStats.kpis.totalChange || "+0%", 
-      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down", 
-      icon: Users, 
-      color: "text-rose-600", 
+    {
+      name: "Siguiente Forecast",
+      value: Math.round(safeStats.kpis.total * 1.15),
+      change: safeStats.kpis.totalChange || "+0%",
+      trend: parseFloat(safeStats.kpis.totalChange) >= 0 ? "up" : "down",
+      icon: Users,
+      color: "text-rose-600",
       bg: "bg-rose-500/10",
       info: "Proyección estimada (+15%) del volumen para el cierre del ciclo basada en la tendencia actual."
     },
-    { 
-      name: "Aprobados", 
-      value: safeStats.kpis.aprobados, 
-      change: safeStats.kpis.approvedChange || "+0%", 
-      trend: parseFloat(safeStats.kpis.approvedChange) >= 0 ? "up" : "down", 
-      icon: CheckCircle2, 
-      color: "text-emerald-600", 
+    {
+      name: "Aprobados",
+      value: safeStats.kpis.aprobados,
+      change: safeStats.kpis.approvedChange || "+0%",
+      trend: parseFloat(safeStats.kpis.approvedChange) >= 0 ? "up" : "down",
+      icon: CheckCircle2,
+      color: "text-emerald-600",
       bg: "bg-emerald-500/10",
       info: "Variación porcentual en la cantidad de diagnósticos firmados comparado con el periodo anterior."
     },
@@ -127,15 +173,15 @@ export default function DashboardPage() {
           {/* Doctor Multi-Select Filter (Admin Only) */}
           {currentUser?.rol === 'admin' && doctors.length > 0 && (
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className="bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-700 flex items-center gap-2 shadow-sm hover:border-blue-400 transition-all active:scale-95"
               >
                 <Filter className="w-4 h-4 text-blue-500" />
                 <span>
-                  {selectedDoctors.length === 0 ? "Todos los Médicos" : 
-                   selectedDoctors.length === 1 ? doctors.find(d => d.id === selectedDoctors[0])?.name :
-                   `${selectedDoctors.length} Médicos`}
+                  {selectedDoctors.length === 0 ? "Todos los Médicos" :
+                    selectedDoctors.length === 1 ? doctors.find(d => d.id === selectedDoctors[0])?.name :
+                      `${selectedDoctors.length} Médicos`}
                 </span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -143,13 +189,13 @@ export default function DashboardPage() {
               {isFilterOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)} />
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50 overflow-hidden"
                   >
                     <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                      <button 
+                      <button
                         onClick={() => setSelectedDoctors([])}
                         className={`w-full text-left px-4 py-2 rounded-xl text-sm font-bold transition-colors mb-1 ${selectedDoctors.length === 0 ? 'bg-blue-50 text-blue-600' : 'hover:bg-slate-50 text-slate-600'}`}
                       >
@@ -173,7 +219,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <button 
+          <button
             onClick={async () => {
               setExporting(true);
               try {
@@ -204,7 +250,7 @@ export default function DashboardPage() {
           const numericChange = parseFloat(stat.change);
           const isPositive = numericChange > 0;
           const isNegative = numericChange < 0;
-          
+
           // Color logic based on sentiment (Neutral for zero)
           let colorClass = "text-slate-400";
           if (stat.name === "Pendientes") {
@@ -229,14 +275,14 @@ export default function DashboardPage() {
                 <div className={`${stat.bg} p-3 rounded-2xl`}>
                   <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <div className={`flex items-center gap-1 text-sm font-bold ${colorClass}`}>
                     {stat.change}
                     {isPositive && <ArrowUpRight className="w-4 h-4" />}
                     {isNegative && <ArrowDownRight className="w-4 h-4" />}
                   </div>
-                  
+
                   {/* Tooltip Wrapper */}
                   <div className="relative group/tooltip">
                     <Info className="w-4 h-4 text-slate-300 hover:text-blue-500 cursor-help transition-colors" />
@@ -269,68 +315,67 @@ export default function DashboardPage() {
           )}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <h3 className="text-xl font-bold tracking-tight">Volumen de Estudios</h3>
-            
+
             <div className="flex bg-slate-100/50  p-1 rounded-xl items-center">
-               {[15, 30, 45, 60].map((d) => (
-                 <button
-                   key={d}
-                   onClick={() => setDaysRange(d)}
-                   className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                     daysRange === d 
-                       ? "bg-white text-blue-600 shadow-sm" 
-                       : "text-slate-500 hover:text-slate-900"
-                   }`}
-                 >
-                   {d} días
-                 </button>
-               ))}
+              {[15, 30, 45, 60].map((d) => (
+                <button
+                  key={d}
+                  onClick={() => setDaysRange(d)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${daysRange === d
+                      ? "bg-white text-blue-600 shadow-sm"
+                      : "text-slate-500 hover:text-slate-900"
+                    }`}
+                >
+                  {d} días
+                </button>
+              ))}
             </div>
           </div>
           <div className="h-[300px] w-full mt-auto">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={safeStats.volumeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                   <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                   </linearGradient>
-                   <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
-                     <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                     <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                   </linearGradient>
+                  <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f033" />
                 <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#ffffff', 
-                    border: '1px solid #e2e8f0', 
-                    borderRadius: '16px', 
-                    fontSize: '12px', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '16px',
+                    fontSize: '12px',
                     color: '#0f172a',
                     boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
-                  }} 
+                  }}
                 />
-                
+
                 {/* Real Data Line (Solid) */}
-                <Area 
-                  type="monotone" 
-                  dataKey="total" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3} 
-                  fillOpacity={1} 
-                  fill="url(#colorTotal)" 
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#3b82f6"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorTotal)"
                 />
 
                 {/* Forecast Line (Dotted) - Overlaid on top with subtle fill */}
-                <Area 
-                  type="monotone" 
-                  dataKey="forecast" 
-                  stroke="#3b82f6" 
-                  strokeWidth={2} 
+                <Area
+                  type="monotone"
+                  dataKey="forecast"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
                   strokeDasharray="5 5"
-                  fillOpacity={1} 
+                  fillOpacity={1}
                   fill="url(#colorForecast)"
                   connectNulls={true}
                 />
@@ -342,11 +387,11 @@ export default function DashboardPage() {
         <div className="glass p-8 rounded-[2.5rem] flex flex-col">
           <h3 className="text-xl font-bold tracking-tight mb-8">Distribución Clínica</h3>
           <div className="space-y-8 flex-1 flex flex-col justify-center">
-             {safeStats.distribution.length > 0 ? safeStats.distribution.map((dist: any) => (
-               <ClassificationItem key={dist.clasificacion} label={dist.clasificacion} value={parseFloat(dist.percentage)} />
-             )) : (
-               <p className="text-center text-slate-400 text-sm italic">Sin datos de distribución</p>
-             )}
+            {safeStats.distribution.length > 0 ? safeStats.distribution.map((dist: any) => (
+              <ClassificationItem key={dist.clasificacion} label={dist.clasificacion} value={parseFloat(dist.percentage)} />
+            )) : (
+              <p className="text-center text-slate-400 text-sm italic">Sin datos de distribución</p>
+            )}
           </div>
         </div>
       </div>
@@ -357,7 +402,7 @@ export default function DashboardPage() {
 function ClassificationItem({ label, value }: { label: string; value: number }) {
   const color = label === 'normal' ? 'bg-status-normal' : label === 'elevada' ? 'bg-status-elevated' : 'bg-status-anormal';
   const labelMap: any = { normal: 'Normal', elevada: 'PA Elevada', anormal: 'HTA Confirmada' };
-  
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-end">

@@ -10,7 +10,7 @@ export async function getCurrentUser() {
 
 export async function getClinicDoctors() {
   const session = await getSession();
-  if (!session || session.rol !== 'admin') throw new Error("Unauthorized");
+  if (!session || session.rol !== 'admin') return [];
   return await sql`
     SELECT id, nombre_completo as name 
     FROM medicos 
