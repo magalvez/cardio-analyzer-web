@@ -49,8 +49,8 @@ const MOCK_STATS = {
     const random = Math.floor(Math.random() * 20);
     return {
       date: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-      total: base + random,
-      forecast: null
+      total: (base + random) as number | null,
+      forecast: null as number | null
     };
   })
 };
@@ -58,8 +58,8 @@ const MOCK_STATS = {
 // Add forecast tips to mock data
 if (MOCK_STATS.volumeData.length > 0) {
   const last = MOCK_STATS.volumeData[MOCK_STATS.volumeData.length - 1];
-  MOCK_STATS.volumeData.push({ date: "Próx. 24h", total: null, forecast: last.total + 5 });
-  MOCK_STATS.volumeData.push({ date: "Próx. 48h", total: null, forecast: last.total + 12 });
+  MOCK_STATS.volumeData.push({ date: "Próx. 24h", total: null, forecast: (last.total || 0) + 5 });
+  MOCK_STATS.volumeData.push({ date: "Próx. 48h", total: null, forecast: (last.total || 0) + 12 });
   last.forecast = last.total;
 }
 
