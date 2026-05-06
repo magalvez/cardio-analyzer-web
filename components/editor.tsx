@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
 import { 
   Bold, 
   Italic, 
@@ -14,7 +15,10 @@ import {
   Undo,
   Redo,
   Heading1,
-  Heading2
+  Heading2,
+  AlignLeft,
+  AlignCenter,
+  AlignJustify
 } from "lucide-react";
 
 const MenuBar = ({ editor }: { editor: any }) => {
@@ -59,6 +63,27 @@ const MenuBar = ({ editor }: { editor: any }) => {
       <div className="w-px h-8 bg-slate-200  mx-1" />
 
       <button
+        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'left' }) ? "bg-blue-600 text-white" : "hover:bg-slate-200 "}`}
+      >
+        <AlignLeft className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'center' }) ? "bg-blue-600 text-white" : "hover:bg-slate-200 "}`}
+      >
+        <AlignCenter className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        className={`p-2 rounded-lg transition-all ${editor.isActive({ textAlign: 'justify' }) ? "bg-blue-600 text-white" : "hover:bg-slate-200 "}`}
+      >
+        <AlignJustify className="w-4 h-4" />
+      </button>
+
+      <div className="w-px h-8 bg-slate-200  mx-1" />
+
+      <button
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={`p-2 rounded-lg transition-all ${editor.isActive("bulletList") ? "bg-blue-600 text-white" : "hover:bg-slate-200 "}`}
       >
@@ -96,6 +121,10 @@ export default function ReportEditor({ content, onChange }: { content: string, o
       StarterKit,
       Underline,
       Link.configure({ openOnClick: false }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -110,6 +139,14 @@ export default function ReportEditor({ content, onChange }: { content: string, o
 
   return (
     <div className="border border-slate-200  rounded-3xl overflow-hidden bg-white  shadow-sm focus-within:ring-2 focus-within:ring-blue-500/10 transition-all">
+      <style>{`
+        .ProseMirror h2 { color: #1F4E79; font-size: 14pt; margin-top: 20px; }
+        .ProseMirror h3 { color: #1F4E79; font-size: 12pt; }
+        .ProseMirror p { font-family: Arial, sans-serif; line-height: 1.6; }
+        .ProseMirror hr { border: none; border-bottom: 2px solid #1F4E79; margin: 12px 0; }
+        .ProseMirror strong { font-weight: 700; }
+        .ProseMirror em { font-style: italic; }
+      `}</style>
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
     </div>

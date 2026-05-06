@@ -3,32 +3,41 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
-  Building2, ShieldCheck, Percent, BookOpen, Save, Globe, BellRing, Loader2, Check
+  Building2, ShieldCheck, Percent, BookOpen, Save, Globe, BellRing, Loader2, Check, ExternalLink
 } from "lucide-react";
-import { getClinicConfig, updateClinicConfig } from "./actions";
+import { getClinicConfig, updateClinicConfig, getClinicalGuidelines } from "./actions";
 
 export default function ConfigPage() {
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState<any>(null);
   const [guia, setGuia] = useState("");
+  const [guiaId, setGuiaId] = useState("");
   const [name, setName] = useState("");
   const [iva, setIva] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [availableGuias, setAvailableGuias] = useState<any[]>([]);
 
   useEffect(() => {
-    getClinicConfig().then(data => {
-      if (data) {
-        setConfig(data);
-        setGuia(data.guide || "ESH 2023");
-        setName(data.name || "");
-        setIva(data.iva || 0);
+    Promise.all([
+      getClinicConfig(),
+      getClinicalGuidelines()
+    ]).then(([configData, guiasData]) => {
+      if (configData) {
+        setConfig(configData);
+        setGuia(configData.guide || "ESH2023");
+        setGuiaId(configData.guide_id || "");
+        setName(configData.name || "");
+        setIva(configData.iva || 0);
+      }
+      if (guiasData) {
+        setAvailableGuias(guiasData);
       }
     }).finally(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    await updateClinicConfig({ name, guide: guia, iva: Number(iva) });
+    await updateClinicConfig({ name, guide: guia, guide_id: guiaId, iva: Number(iva) });
     setSaving(false);
   };
 
@@ -95,10 +104,38 @@ export default function ConfigPage() {
              </div>
              <div className="space-y-4">
                 <label className="text-sm font-bold text-slate-400 uppercase tracking-widest ml-1">Guía Clínica de Referencia</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   <GuiaOption id="ESC2024" title="ESC 2024" desc="European Soc. Cardio" active={guia === "ESC 2024"} onClick={() => setGuia("ESC 2024")} />
-                   <GuiaOption id="ESH2023" title="ESH 2023" desc="European Soc. Hyper" active={guia === "ESH 2023"} onClick={() => setGuia("ESH 2023")} />
-                   <GuiaOption id="ACC2017" title="ACC/AHA" desc="American College" active={guia === "ACC/AHA 2017"} onClick={() => setGuia("ACC/AHA 2017")} />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                   {availableGuias.map((g) => {
+                     // Display mapping
+                     let displayTitle = g.codigo;
+                     if (displayTitle === "ACC_AHA2017") displayTitle = "ACC/AHA 2017";
+                     if (displayTitle === "AHA_ACC_2025") displayTitle = "AHA/ACC 2025";
+                     if (displayTitle === "ESH2023") displayTitle = "ESH 2023";
+                     if (displayTitle === "ESC2024") displayTitle = "ESC 2024";
+
+                     // Subtitle extraction: use the year and a short version of the name
+                     let subtitle = g.nombre_completo;
+                     if (subtitle.includes("Guidelines for the management of")) {
+                        subtitle = subtitle.split("Guidelines for the management of")[0].trim();
+                     } else if (subtitle.includes("Guideline for the Prevention")) {
+                        subtitle = subtitle.split("Guideline for the Prevention")[0].trim();
+                     }
+                     if (subtitle.length > 35) subtitle = subtitle.substring(0, 35) + "...";
+
+                     return (
+                       <GuiaOption 
+                         key={g.id}
+                         id={g.id} 
+                         title={displayTitle} 
+                         desc={subtitle} 
+                         active={guia === g.codigo} 
+                         onClick={() => {
+                           setGuia(g.codigo);
+                           setGuiaId(g.id);
+                         }} 
+                       />
+                     );
+                   })}
                 </div>
              </div>
           </section>
