@@ -276,23 +276,10 @@ function prepareHtmlForDocx(html: string): string {
   styled = styled.replace(
     /<h(2|3)([^>]*)>([\s\S]*?)<\/h\1>\s*<hr\s*\/?>/gi,
     (_, level, attrs, content) => {
-      const isSignature = content.toLowerCase().includes('dr.');
-      const isConclusion = content.toLowerCase().includes('conclusión');
-      const isReferences = content.toLowerCase().includes('referencias');
-
-      let spacingRows = '';
-      if (isConclusion || isReferences) {
-        spacingRows = '<tr><td style="font-size:11pt;line-height:11pt;">&nbsp;</td></tr>';
-      } else if (isSignature) {
-        // Signatures usually need more space
-        spacingRows = '<tr><td style="font-size:11pt;line-height:11pt;">&nbsp;</td></tr><tr><td style="font-size:11pt;line-height:11pt;">&nbsp;</td></tr>';
-      }
-
       const fontSize = level === '2' ? '12pt' : '11pt';
       const alignMatch = attrs.match(/style="([^"]*)"/)?.[1] || '';
       return `
         <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin: 0; margin-top: 0pt; padding: 0;">
-          ${spacingRows}
           <tr>
             <td style="font-family:Arial;color:#1F4E79;font-size:${fontSize};margin:0;padding:0;border-bottom: 2px solid #1F4E79;${alignMatch}">
               <strong>${content}</strong>
@@ -302,6 +289,10 @@ function prepareHtmlForDocx(html: string): string {
       `;
     }
   );
+
+  // Remove empty spacer paragraphs that follow a table (like the header table)
+  // to avoid unwanted gaps before the next section
+  styled = styled.replace(/(<\/table>)\s*<p[^>]*>\s*(&nbsp;|<br\s*\/?>)?\s*<\/p>/gi, '$1');
 
   // 2. Convert remaining h2 headings to styled paragraphs
   styled = styled.replace(
@@ -323,26 +314,30 @@ function prepareHtmlForDocx(html: string): string {
     }
   );
 
-  // Style the "NOTA: **" disclaimer using italics (as seen in image)
+  // Style the "NOTA:" disclaimer using italics and light gray (more flexible regex)
   styled = styled.replace(
-    /NOTA:\s*\*\*(.*?)\*\*/g,
-    '<em>NOTA: $1</em>'
+    /(NOTA:[\s\S]*?)(?=<\/p>|$)/gi,
+    '<span style="color:#7F7F7F;font-size:9pt;"><em>$1</em></span>'
+  );
+
+  // Style the content of REFERENCIAS (typically starts with a year or Guideline)
+  styled = styled.replace(
+    /((?:\d{4}\s+AHA\/ACC|Guideline)[\s\S]*?)(?=<\/p>|$)/gi,
+    '<span style="color:#7F7F7F;font-size:9pt;">$1</span>'
   );
 
   // Add font-family and font-size to <p> tags without style
   styled = styled.replace(
     /<p(?![^>]*style)([^>]*)>/gi,
-    '<p style="font-family:Arial;font-size:11pt;margin:0;margin-bottom:0pt;"$1>'
+    '<p style="font-family:Arial;font-size:11pt;line-height:1.2;margin:0;margin-bottom:0pt;"$1>'
   );
 
   // Add font-family and font-size to <p> tags with style but no font-family
   styled = styled.replace(
     /<p([^>]*?)style="((?!font-family)[^"]*)"([^>]*)>/gi,
-    '<p$1style="font-family:Arial;font-size:11pt;margin:0;margin-bottom:0pt;$2"$3>'
+    '<p$1style="font-family:Arial;font-size:11pt;line-height:1.2;margin:0;margin-bottom:0pt;$2"$3>'
   );
 
-  // Remove empty spacer paragraphs that just have &nbsp; or <br>
-  styled = styled.replace(/<p[^>]*>\s*(&nbsp;|<br\s*\/?>)\s*<\/p>/gi, '');
 
   // 4. Replace standalone <hr> with a safe tight table-based horizontal line.
   const hrReplacement = `
@@ -355,19 +350,6 @@ function prepareHtmlForDocx(html: string): string {
     </table>
   `;
   styled = styled.replace(/<hr\s*\/?>/gi, hrReplacement);
-
-  // 5. Manual Spacing Adjustments
-  // Add 1 line break before "NOTA:" - handles tags like <strong> or <span> before the text
-  styled = styled.replace(
-    /(?:<p[^>]*>)?\s*(?:<[^>]+>)*\s*NOTA:/gi,
-    '<p style="margin:0;font-size:11pt;line-height:11pt;">&nbsp;</p>$&'
-  );
-
-  // Add 2 line breaks before the doctor's signature - handles tags like <strong> or <span>
-  styled = styled.replace(
-    /(?:<p[^>]*>)?\s*(?:<[^>]+>)*\s*Dr\.\s*JUAN\s*RAMON/gi,
-    '<p style="margin:0;font-size:11pt;line-height:11pt;">&nbsp;</p><p style="margin:0;font-size:11pt;line-height:11pt;">&nbsp;</p>$&'
-  );
 
   // Final aggressive trim to remove any spaces or breaks at the very beginning
   styled = styled.trim().replace(/^(\s|&nbsp;|<br\s*\/?>|<p[^>]*>\s*(&nbsp;|<br\s*\/?>)?\s*<\/p>)*/gi, '');
